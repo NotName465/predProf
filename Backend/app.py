@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from flask import Flask, render_template, send_from_directory, jsonify, session, redirect, url_for
 from flask import request as flask_request
 import os
@@ -8,7 +8,6 @@ import os
 basedir = os.path.dirname(os.path.abspath(__file__))
 frontend_dir = os.path.join(basedir, '../frontend')
 
-=======
 import os
 from flask import Flask, render_template, send_from_directory, jsonify, request
 
@@ -19,12 +18,11 @@ frontend_dir = os.path.join(basedir, '../Frontend')
 
 # template_folder — где HTML
 # static_folder — где CSS и JS
->>>>>>> origin/main
 app = Flask(__name__,
             template_folder=frontend_dir,
             static_folder=frontend_dir)
 
-<<<<<<< HEAD
+
 # Секретный ключ обязателен для работы сессий (кук)
 app.secret_key = 'super_secret_key_for_school_canteen'
 
@@ -54,18 +52,12 @@ users_db = {
 }
 
 
-# ==========================================
-# МАРШРУТЫ СТРАНИЦ (VIEW ROUTES)
-# ==========================================
-=======
-# 3. Маршруты (Routes) - привязываем URL к HTML файлам
->>>>>>> origin/main
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-<<<<<<< HEAD
 
 @app.route('/login')
 def login():
@@ -113,9 +105,6 @@ def logout():
     return redirect('/login')
 
 
-# --- СТАТИЧЕСКИЕ ФАЙЛЫ (CSS/JS) ---
-# Нужны, так как папка frontend лежит нестандартно
-=======
 @app.route('/login')
 def login():
     return render_template('login.html')
@@ -140,24 +129,15 @@ def admin_dashboard():
     return render_template('admin.html')
 
 #Подтягиваем директории где лежат CSS и JS
->>>>>>> origin/main
 @app.route('/css/<path:filename>')
 def serve_css(filename):
     return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
 @app.route('/js/<path:filename>')
 def serve_js(filename):
     return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
 
-<<<<<<< HEAD
-
-# ==========================================
-# API ЭНДПОИНТЫ (ОБРАБОТКА ДАННЫХ)
-# ==========================================
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -252,7 +232,7 @@ def redirect_to_role_page():
 # ЗАПУСК
 if __name__ == '__main__':
     app.run(debug=True)
-=======
+
 # 1. API Логина (принимает данные из формы входа)
 # Получаем данные из формы при входе.
 @app.route('/api/login', methods=['POST'])
@@ -279,4 +259,3 @@ def api_login():
         return jsonify({'status': 'error', 'message': 'Неверный логин или пароль'}), 401
 if __name__ == '__main__':
     app.run(debug=True)
->>>>>>> origin/main
