@@ -1,11 +1,33 @@
-<!-- Страница входа или можно сделать, чтобы просто поверх главного окна вылезало окно с логином -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему</title>
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
+    <div class="login-container">
+        <h2>Вход</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input type="text" id="username" placeholder="student" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" placeholder="123" required>
+            </div>
+
+            <button type="submit">Войти</button>
+        </form>
+        <p id="message"></p>
+    </div>
+
+    <!-- Подключаем скрипт -->
+    <script src="/js/auth.js"></script>
 </body>
 </html>

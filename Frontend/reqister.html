@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация в столовой</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Небольшие доп. стили для этой страницы */
+        .register-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 350px;
+            text-align: center;
+        }
+        .link { color: #007bff; text-decoration: none; }
+        .link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="register-container">
+        <h2>Регистрация</h2>
+        <p style="color: gray; font-size: 0.9em;">Создайте аккаунт ученика</p>
+
+        <form id="registerForm" style="text-align: left; margin-top: 20px;">
+
+            <div class="form-group">
+                <label for="email">Электронная почта *</label>
+                <input type="email" id="email" required placeholder="name@school.com">
+            </div>
+
+            <div class="form-group">
+                <label for="username">Логин *</label>
+                <input type="text" id="username" required placeholder="Придумайте логин">
+            </div>
+
+            <div class="form-group">
+                <label for="full_name">ФИО (Фамилия Имя Отчество)</label>
+                <input type="text" id="full_name" placeholder="Иванов Иван Иванович">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль *</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Повторите пароль *</label>
+                <input type="password" id="confirm_password" required>
+            </div>
+
+            <button type="submit" style="background-color: #28a745; margin-top: 10px;">Зарегистрироваться</button>
+        </form>
+
+        <p id="message" style="margin-top: 15px; min-height: 20px; font-weight: bold;"></p>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <p>Уже есть аккаунт? <a href="/login" class="link">Войти</a></p>
+    </div>
+
+    <!-- Подключаем наш универсальный скрипт -->
+    <script src="/js/auth.js"></script>
+
+</body>
+</html>
