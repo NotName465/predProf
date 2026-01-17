@@ -1,55 +1,119 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Школьное питание</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <style>
-        .container { text-align: center; margin-top: 50px; }
-        .nav-buttons { display: flex; flex-direction: column; gap: 15px; align-items: center; margin-top: 30px; }
-        .btn-link {
-            text-decoration: none;
-            padding: 15px 30px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            font-size: 18px;
-            width: 250px;
-            transition: background 0.3s;
-        }
-        .btn-link:hover { background-color: #0056b3; }
-        .btn-logout { background-color: #dc3545; }
-        .btn-logout:hover { background-color: #a71d2a; }
-        .btn-login { background-color: #28a745; } /* Зеленая для входа */
-        .btn-login:hover { background-color: #218838; }
-        .btn-register { background-color: #17a2b8; } /* Голубая для регистрации */
-        .btn-register:hover { background-color: #138496; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Столовая — Школа 2098</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Candara, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+
+    .razmytyy_fon {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Убедитесь, что картинка лежит в frontend/assets/stolovaya.jpg */
+      background: url('/assets/stolovaya.jpg') center/cover no-repeat;
+      filter: blur(3px);
+      z-index: -1;
+    }
+
+
+    .shapka {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+    }
+
+    .zagolovok_shapki {
+      font-size: 20px;
+      color: #0d47a1;
+      font-weight: bold;
+    }
+
+    .knopki_v_shapke {
+      display: flex;
+      gap: 12px;
+    }
+
+    .knopka {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+
+    .knopka:hover {
+      background: #1976D2;
+    }
+
+
+    .privetstvennyy_tekst {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-size: 36px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 0 3px 8px rgba(0,0,0,0.9);
+      opacity: 0;
+      animation: vyiezd 1.2s ease-out forwards;
+      max-width: 90%;
+      width: 700px;
+    }
+
+    @keyframes vyiezd {
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Добро пожаловать в систему питания!</h1>
-        <p>Выберите раздел для перехода:</p>
+  <!-- Фон -->
+  <!-- Если картинка stolovaya.jpg лежит в корне frontend/assets, путь будет таким -->
+  <div class="razmytyy_fon"></div>
 
-        <div class="nav-buttons">
-            <!-- Разделы ролей -->
-            <a href="/student" class="btn-link">🎓 Я ученик</a>
-            <a href="/cook" class="btn-link">👨‍🍳 Я повар</a>
-            <a href="/admin" class="btn-link">⚙️ Администратор</a>
 
-            <hr style="width: 50%; border-color: #ddd;">
-
-            <!-- Кнопки входа и регистрации -->
-            <div style="display: flex; gap: 10px;">
-                <a href="/login" class="btn-link btn-login" style="width: auto;">🔑 Войти</a>
-                <a href="/register" class="btn-link btn-register" style="width: auto;">📝 Регистрация</a>
-            </div>
-
-            <a href="/logout" class="btn-link btn-logout" style="margin-top: 10px;">🚪 Выйти</a>
-        </div>
+  <div class="shapka">
+    <div class="zagolovok_shapki">Cтоловая — Школа 2098</div>
+    <div class="knopki_v_shapke">
+      <!-- ДОБАВИЛ ССЫЛКИ -->
+      <button class="knopka" onclick="window.location.href='/login'">Войти</button>
+      <button class="knopka" onclick="window.location.href='/login'">Регистрация</button>
     </div>
+  </div>
+
+
+  <div class="privetstvennyy_tekst">
+    Автоматизированная информационная система школьного питания
+  </div>
 
 </body>
 </html>

@@ -116,13 +116,17 @@ def api_login():
 @app.route('/api/register', methods=['POST'])
 def api_register():
     data = flask_request.get_json()
+
     email = data.get('email', '').strip()
     username = data.get('username', '').strip()
     password = data.get('password')
     confirm = data.get('confirm_password')
 
+    # Получаем список аллергенов (по умолчанию пустой список)
+    allergens = data.get('allergens', [])
+
     if not username or not password or not email:
-        return jsonify({'status': 'error', 'message': 'Заполните все поля'}), 400
+        return jsonify({'status': 'error', 'message': 'Заполните основные поля'}), 400
 
     if password != confirm:
         return jsonify({'status': 'error', 'message': 'Пароли не совпадают'}), 400
@@ -135,18 +139,29 @@ def api_register():
         return jsonify({'status': 'error', 'message': 'Почта уже занята'}), 400
 
     hashed = generate_password_hash(password)
+
+    # Превращаем список ['рыба', 'молоко'] в строку '["рыба", "молоко"]' для SQLite
+    allergens_json = json.dumps(allergens)
+
     try:
-        cur = conn.execute('INSERT INTO users (username, email, password_hash, role) VALUES (?,?,?,?)',
-                           (username, email, hashed, 'student'))
+        cur = conn.execute('''
+            INSERT INTO users (username, email, password_hash, role, allergens) 
+            VALUES (?, ?, ?, ?, ?)
+        ''', (username, email, hashed, 'student', allergens_json))
+
         new_id = cur.lastrowid
         conn.commit()
-    except:
+    except Exception as e:
         conn.close()
-        return jsonify({'status': 'error', 'message': 'Ошибка БД'}), 500
+        print(f"Error: {e}")
+        return jsonify({'status': 'error', 'message': 'Ошибка записи в БД'}), 500
 
     conn.close()
+
+    # Авто-вход
     session['user_id'] = new_id
     session['role'] = 'student'
+
     return jsonify({'status': 'success', 'redirect': '/student'}), 200
 
 

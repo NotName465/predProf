@@ -1,33 +1,229 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход в систему</title>
-    <!-- Подключаем стили -->
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Вход и регистрация — Столовая Школа 2098</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Candara, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #89a7bd, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .forma_konteyner {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .zagolovok_formy {
+      color: #0d47a1;
+      font-size: 22px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .gruppa_polei {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .metka_poliya {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .pole_vvoda {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      font-size: 17px;
+      transition: border-color 0.3s;
+    }
+
+    .pole_vvoda:focus {
+      outline: none;
+      border-color: #2196F3;
+    }
+
+    .knopka_formy {
+      width: 100%;
+      padding: 14px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 12px;
+      min-height: 48px;
+    }
+
+    .knopka_formy:hover {
+      background: #1976D2;
+    }
+
+    .pereklyuchatel {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .ssylka_pereklyucheniya {
+      color: #2196F3;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 6px 0;
+      display: inline-block;
+    }
+
+    .ssylka_pereklyucheniya:hover {
+      text-decoration: underline;
+    }
+
+    .forma_skryta {
+      display: none;
+    }
+
+
+    .spisok_allergenov {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .flazok {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      color: #444;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .flazok:hover {
+      background: #f5f9ff;
+    }
+
+    .flazok input[type="checkbox"] {
+      margin: 0;
+      transform: scale(1.3);
+      min-width: 20px;
+      min-height: 20px;
+    }
+
+
+    button, .knopka_formy, .ssylka_pereklyucheniya {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      -webkit-appearance: none;
+    }
+
+
+    @media (max-width: 360px) {
+      .spisok_allergenov {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .zagolovok_formy {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <h2>Вход</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Логин</label>
-                <input type="text" id="username" placeholder="student" required>
-            </div>
+  <div class="forma_konteyner">
 
-            <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" placeholder="123" required>
-            </div>
-
-            <button type="submit">Войти</button>
-        </form>
-        <p id="message"></p>
+    <div id="forma_vhoda">
+      <div class="zagolovok_formy">Вход в систему</div>
+      <form id="loginForm">
+        <div class="gruppa_polei">
+          <label class="metka_poliya" for="login">Логин или email</label>
+          <input type="text" id="login" class="pole_vvoda" autocomplete="username" required>
+        </div>
+        <div class="gruppa_polei">
+          <label class="metka_poliya" for="parol">Пароль</label>
+          <input type="password" id="parol" class="pole_vvoda" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="knopka_formy">Войти</button>
+      </form>
+      <div class="pereklyuchatel">
+        Нет аккаунта? <span class="ssylka_pereklyucheniya" onclick="pokazat('registraciya')">Зарегистрироваться</span>
+      </div>
     </div>
 
-    <!-- Подключаем скрипт -->
-    <script src="/js/auth.js"></script>
+    <div id="forma_registracii" class="forma_skryta">
+      <div class="zagolovok_formy">Регистрация</div>
+      <form id="regForm">
+        <div class="gruppa_polei">
+          <label class="metka_poliya" for="imya">Имя</label>
+          <input type="text" id="imya" class="pole_vvoda" autocomplete="name" required>
+        </div>
+        <div class="gruppa_polei">
+          <label class="metka_poliya" for="email">Email</label>
+          <input type="text" id="email" class="pole_vvoda" autocomplete="email" required>
+        </div>
+        <div class="gruppa_polei">
+          <label class="metka_poliya" for="novyy_parol">Пароль</label>
+          <input type="password" id="novyy_parol" class="pole_vvoda" autocomplete="new-password" required>
+        </div>
+
+        <div class="gruppa_polei">
+          <div class="metka_poliya">Что нежелательно в составе?</div>
+          <div class="spisok_allergenov">
+            <label class="flazok"><input type="checkbox" name="allergen" value="арахис"> арахис</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="орехи"> орехи</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="рыба"> рыба</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="яйца"> яйца</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="молоко"> молоко</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="курица"> курица</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="глютен"> глютен</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="кинза"> кинза</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="говядина"> говядина</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="свинина"> свинина</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="мед"> мед</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="лук"> лук</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="сахар"> сахар</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="море-продукты"> море-продукты</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="чеснок"> чеснок</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="грибы"> грибы</label>
+            <label class="flazok"><input type="checkbox" name="allergen" value="мяса"> мясо</label>
+          </div>
+        </div>
+
+        <button type="submit" class="knopka_formy">Зарегистрироваться</button>
+      </form>
+      <div class="pereklyuchatel">
+        Уже есть аккаунт? <span class="ssylka_pereklyucheniya" onclick="pokazat('vhod')">Войти</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/login.js"></script>
 </body>
 </html>
