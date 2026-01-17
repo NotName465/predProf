@@ -1,11 +1,56 @@
-<!-- Панель повара -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="povar.css">
+    <title>Повар</title>
 </head>
 <body>
 
+    <header class="shapka">
+        <div class="golova">
+            <div class="tityle">
+                <button class="prof">👤</button>
+                <h1 class="title">Столовая ГБОУ №2098</h1>
+            </div>
+        </div>
+    </header>
+    <div class="main-layout">
+        <aside class="left-panel">
+            <header class="head">
+                <h1>👨‍🍳 Панель повара</h1>
+            </header>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="meals">🍽️ Питание</button>
+                <button class="tab-btn" data-tab="inventory">📦 Остатки</button>
+                <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+            </nav>
+        </aside>
+
+        <!-- Центральный контент -->
+        <div class="center-content">
+            <main class="content">
+                <div id="meals" class="tab-content active">
+                    <h2>Выдать питание</h2>
+                    <p>Форма для выдачи завтрака/обеда ученику.</p>
+                    <label>ID ученика: <input type="number" id="studentId" placeholder="123"></label>
+                    <button onclick="alert('Питание выдано!')">Выдать</button>
+                </div>
+
+                <div id="inventory" class="tab-content">
+                    <h2>Остатки продуктов</h2>
+
+                </div>
+
+                <div id="stats" class="tab-content">
+                    <h2>Статистика</h2>
+                    <p>Выдано порций: <strong>24</strong></p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="povar.js"></script>
 </body>
 </html>

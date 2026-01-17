@@ -1,57 +1,164 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Candara;
 }
 
-.login-container {
-    background-color: white;
-    padding: 30px;
+body {
+    background: #f5f7fa;
+    color: #333;
+    min-height: 100vh;
+}
+
+
+.shapka {
+    background: #0d47a1;
+    padding: 20px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 0 0 15px 15px;
+}
+
+.golova {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.tityle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.prof {
+    background: #ffffff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    color: white;
+    font-size: 48px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    text-align: center;
+    flex-grow: 1;
+    margin: 0 20px;
+}
+
+/* Основной макет */
+.main-layout {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+    min-height: 60vh;
+}
+
+/* Левая панель — фиксированная ширина, прижата к левому краю */
+.left-panel {
+    width: 220px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    flex-shrink: 0; /* не сжимается */
+}
+
+.head {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #2256a4;
+    color: white;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    width: 300px;
     text-align: center;
 }
 
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
+.head h1 {
+    font-size: 18px;
+    margin: 0;
 }
 
+.tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tab-btn {
+    padding: 12px;
+    border: none;
+    background: #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.tab-btn:hover {
+    background: #808fa5;
+}
+
+.tab-btn.active {
+    background: #4a74b5;
+    color: white;
+}
+
+/* Центральный контент — по центру страницы */
+.center-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.content {
+    width: 100%;
+    max-width: 600px; /* ограничиваем ширину контента */
+}
+
+.tab-content {
+    display: none;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Форма */
 label {
     display: block;
-    margin-bottom: 5px;
-    font-size: 14px;
+    margin: 15px 0 5px;
 }
 
-input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box; /* Чтобы padding не ломал ширину */
+input, button {
+    padding: 8px 12px;
+    margin: 5px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
+    background: #4a74b5;
     color: white;
-    border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-#message {
-    margin-top: 15px;
-    font-size: 14px;
+    border: none;
 }
