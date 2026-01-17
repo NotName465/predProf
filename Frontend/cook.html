@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/style.css">
-
     <title>Повар</title>
 </head>
 <body>
@@ -32,6 +31,8 @@
         <!-- Центральный контент -->
         <div class="center-content">
             <main class="content">
+
+                <!-- Вкладка: Выдача питания -->
                 <div id="meals" class="tab-content active">
                     <h2>Выдать питание</h2>
                     <p>Форма для выдачи завтрака/обеда ученику.</p>
@@ -39,11 +40,40 @@
                     <button onclick="alert('Питание выдано!')">Выдать</button>
                 </div>
 
+                <!-- Вкладка: Остатки (ОБНОВЛЕНА) -->
                 <div id="inventory" class="tab-content">
-                    <h2>Остатки продуктов</h2>
+                    <h2>📦 Управление остатками</h2>
+                    <p>Выберите блюдо, чтобы узнать подробности:</p>
 
+                    <!-- Выпадающий список -->
+                    <select id="dishSelect" style="width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px;">
+                        <option value="">-- Загрузка меню... --</option>
+                    </select>
+
+                    <!-- Карточка с информацией (скрыта по умолчанию) -->
+                    <div id="dishCard" style="display: none; border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+                        <h3 id="cardName" style="margin-bottom: 10px; color: #2256a4;">Название</h3>
+
+                        <div style="display: flex; gap: 15px;">
+                            <!-- Место для фото (если есть) -->
+                            <div id="cardImage" style="width: 100px; height: 100px; background: #ccc; border-radius: 5px; background-size: cover;"></div>
+
+                            <div>
+                                <p>🔥 Калории: <strong id="cardCalories">0</strong> ккал</p>
+                                <p>📦 На складе: <strong id="cardStock" style="font-size: 1.2em;">0</strong> шт.</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <strong>Состав:</strong>
+                            <ul id="cardIngredients" style="padding-left: 20px; margin-top: 5px; color: #555;">
+                                <!-- Сюда JS добавит список -->
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Вкладка: Статистика -->
                 <div id="stats" class="tab-content">
                     <h2>Статистика</h2>
                     <p>Выдано порций: <strong>24</strong></p>

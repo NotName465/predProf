@@ -1,58 +1,34 @@
-
+import sqlite3
+import os
 from flask import Flask, render_template, send_from_directory, jsonify, session, redirect, url_for
 from flask import request as flask_request
-import os
-
-# 1. НАСТРОЙКА ПУТЕЙ
-# Указываем Flask'у, что HTML и CSS лежат в папке ../frontend
+from werkzeug.security import check_password_hash, generate_password_hash
+import json
+# 1. Настройка путей
+# Мы находимся в backend/app.py
 basedir = os.path.dirname(os.path.abspath(__file__))
 frontend_dir = os.path.join(basedir, '../frontend')
+# Путь к базе данных (она лежит в папке database)
+db_path = os.path.join(basedir, '../database/school_canteen.db')
 
-import os
-from flask import Flask, render_template, send_from_directory, jsonify, request
-
-
-basedir = os.path.dirname(os.path.abspath(__file__))
-# Путь к папке frontend
-frontend_dir = os.path.join(basedir, '../Frontend')
-
-# template_folder — где HTML
-# static_folder — где CSS и JS
 app = Flask(__name__,
             template_folder=frontend_dir,
             static_folder=frontend_dir)
 
-
-# Секретный ключ обязателен для работы сессий (кук)
 app.secret_key = 'super_secret_key_for_school_canteen'
 
-# ==========================================
-# ЗАГЛУШКА БАЗЫ ДАННЫХ (В ОПЕРАТИВНОЙ ПАМЯТИ)
-# ==========================================
-# Здесь хранятся пользователи. При перезапуске сервера новые удалятся.
-users_db = {
-    'student': {
-        'password': '1234',
-        'role': 'student',
-        'redirect': '/student',
-        'full_name': 'Тестовый Ученик'
-    },
-    'cook': {
-        'password': '1234',
-        'role': 'cook',
-        'redirect': '/cook',
-        'full_name': 'Тестовый Повар'
-    },
-    'admin': {
-        'password': '1234',
-        'role': 'admin',
-        'redirect': '/admin',
-        'full_name': 'Администратор'
-    }
-}
+
+# --- Функция подключения к БД ---
+def get_db_connection():
+    conn = sqlite3.connect(db_path)
+    # Позволяет обращаться к колонкам по имени (row['email']), а не по индексу
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
-
+# ========================
+# Маршруты страниц (HTML)
+# ========================
 
 @app.route('/')
 def index():
@@ -61,201 +37,168 @@ def index():
 
 @app.route('/login')
 def login():
-    # Если уже авторизован - отправляем внутрь
-    if 'user' in session:
+    # Если пользователь уже вошел (есть user_id в сессии), кидаем в ЛК
+    if 'user_id' in session:
         return redirect_to_role_page()
     return render_template('login.html')
 
 
 @app.route('/register')
 def register():
-    # Если уже авторизован - на регистрации делать нечего
-    if 'user' in session:
+    if 'user_id' in session:
         return redirect_to_role_page()
     return render_template('register.html')
 
 
-# --- ЗАЩИЩЕННЫЕ СТРАНИЦЫ ---
+# --- Защищенные страницы ---
 
 @app.route('/student')
 def student_dashboard():
-    if 'user' not in session:
-        # Если не вошел - кидаем на логин, но запоминаем, куда хотел (next=...)
+    if 'user_id' not in session:
         return redirect(url_for('login', next=flask_request.path))
     return render_template('student.html')
 
 
 @app.route('/cook')
 def cook_dashboard():
-    if 'user' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login', next=flask_request.path))
     return render_template('cook.html')
 
 
 @app.route('/admin')
 def admin_dashboard():
-    if 'user' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login', next=flask_request.path))
     return render_template('admin.html')
 
 
 @app.route('/logout')
 def logout():
-    session.clear()  # Удаляем сессию
+    session.clear()
     return redirect('/login')
 
 
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-@app.route('/register')
-def register():
-    return render_template('register.html')
-
-@app.route('/student')
-def student_dashboard():
-    # Тут будет проверка на права(скоро)
-    return render_template('student.html')
-
-@app.route('/cook')
-def cook_dashboard():
-    # Тут будет проверка на права(скоро)
-    return render_template('cook.html')
-
-@app.route('/admin')
-def admin_dashboard():
-    # Тут будет проверка на права(скоро)
-    return render_template('admin.html')
-
-#Подтягиваем директории где лежат CSS и JS
+# --- Статика (CSS/JS) ---
 @app.route('/css/<path:filename>')
-def serve_css(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
+def serve_css(filename): return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
 
 
 @app.route('/js/<path:filename>')
-def serve_js(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
+def serve_js(filename): return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
 
+
+# ========================
+# API (Логика работы с БД)
+# ========================
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = flask_request.get_json()
 
-    # Считываем данные и сразу убираем пробелы (strip)
-    username = data.get('username', '').strip()
+    # В поле username с фронта может прийти email (по заданию логин = почта)
+    email = data.get('username', '').strip()
     password = data.get('password')
-    next_url = data.get('next_url')  # Ссылка, куда юзер хотел попасть
+    next_url = data.get('next_url')
 
-    print(f"Попытка входа: '{username}' с паролем '{password}'")
+    conn = get_db_connection()
+    # Ищем пользователя по Email
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    conn.close()
 
-    user = users_db.get(username)
-
-    # Проверка пароля (пока просто сравнение строк)
-    if user and user['password'] == password:
-        # Успех: создаем сессию
-        session['user'] = username
+    # Если юзер найден И хеш пароля совпадает
+    if user and check_password_hash(user['password_hash'], password):
+        # Сохраняем ID и роль в сессию
+        session['user_id'] = user['id']
         session['role'] = user['role']
 
-        # Определяем, куда перенаправить:
-        # 1. Если был next_url (юзер нажал "Повар" -> Логин) -> идем туда
-        # 2. Если нет -> идем на стандартную страницу роли
-        target = next_url if next_url else user['redirect']
+        # Определяем куда перенаправить
+        target = next_url if next_url else f"/{user['role']}"
 
-        return jsonify({
-            'status': 'success',
-            'message': 'Вход выполнен!',
-            'redirect': target
-        }), 200
+        return jsonify({'status': 'success', 'redirect': target}), 200
     else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Неверный логин или пароль'
-        }), 401
+        return jsonify({'status': 'error', 'message': 'Неверная почта или пароль'}), 401
 
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
     data = flask_request.get_json()
 
-    # Считываем и чистим данные
     email = data.get('email', '').strip()
     username = data.get('username', '').strip()
-    full_name = data.get('full_name', '').strip()
     password = data.get('password')
     confirm_password = data.get('confirm_password')
 
-    print(f"Попытка регистрации: {username} ({email})")
-
-    # 1. Проверка обязательных полей
+    # Простая валидация
     if not username or not password or not email:
         return jsonify({'status': 'error', 'message': 'Заполните все поля'}), 400
 
-    # 2. Проверка: занят ли логин?
-    if username in users_db:
-        return jsonify({'status': 'error', 'message': 'Логин уже занят'}), 400
-
-    # 3. Проверка совпадения паролей
     if password != confirm_password:
         return jsonify({'status': 'error', 'message': 'Пароли не совпадают'}), 400
 
-    # 4. "Сохранение" в базу
-    users_db[username] = {
-        'password': password,
-        'role': 'student',  # Новые пользователи по умолчанию - студенты
-        'redirect': '/student',
-        'email': email,
-        'full_name': full_name
-    }
+    conn = get_db_connection()
 
-    # 5. Автоматический вход после регистрации
-    session['user'] = username
+    # Проверяем, не занята ли почта
+    existing_user = conn.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+
+    if existing_user:
+        conn.close()
+        return jsonify({'status': 'error', 'message': 'Пользователь с такой почтой уже существует'}), 400
+
+    # Хешируем пароль перед записью в БД
+    hashed_password = generate_password_hash(password)
+
+    try:
+        # Добавляем нового ученика (роль student по умолчанию)
+        cursor = conn.execute('''
+            INSERT INTO users (username, email, password_hash, role, subscription_days)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (username, email, hashed_password, 'student', 0))
+
+        new_user_id = cursor.lastrowid
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        print(f"Ошибка БД: {e}")
+        return jsonify({'status': 'error', 'message': 'Ошибка при сохранении в базу'}), 500
+
+    conn.close()
+
+    # Автоматический вход
+    session['user_id'] = new_user_id
     session['role'] = 'student'
 
-    return jsonify({
-        'status': 'success',
-        'message': 'Регистрация успешна!',
-        'redirect': '/student'
-    }), 200
+    return jsonify({'status': 'success', 'redirect': '/student'}), 200
 
+# API для повара (ПЕРЕПИСАТЬ!)
+@app.route('/api/dishes', methods=['GET'])
+def get_dishes():
+    conn = get_db_connection()
+    dishes = conn.execute('SELECT * FROM dishes').fetchall()
+    conn.close()
 
-# Вспомогательная функция для редиректа внутри Python
+    # SQLite возвращает строки, а нам нужно распаковать JSON-поля (ингредиенты)
+    result = []
+    for dish in dishes:
+        d = dict(dish)  # Превращаем строку БД в словарь
+        # Распаковываем JSON строку обратно в список ['Лук', 'Морковь']
+        try:
+            d['ingredients'] = json.loads(d['ingredients'])
+        except:
+            d['ingredients'] = []  # Если ошибка или пусто
+
+        result.append(d)
+
+    return jsonify(result), 200
+
+    return jsonify(dishes_list), 200
 def redirect_to_role_page():
+    """Помощник: перенаправляет на страницу роли"""
     role = session.get('role')
-    if role == 'student': return redirect('/student')
-    if role == 'cook': return redirect('/cook')
-    if role == 'admin': return redirect('/admin')
+    if role:
+        return redirect(f"/{role}")
     return redirect('/')
 
 
-# ЗАПУСК
-if __name__ == '__main__':
-    app.run(debug=True)
-
-# 1. API Логина (принимает данные из формы входа)
-# Получаем данные из формы при входе.
-@app.route('/api/login', methods=['POST'])
-def api_login():
-    # Получаем JSON, который прислал JS
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    print(f"Попытка входа: {username} / {password}") # Увидите это в терминале
-
-    #ЗАГЛУШКА ЗАГЛУШКА ЗАГЛУШКА
-    if username == 'student' and password == '123':
-        return jsonify({
-            'status': 'success',
-            'message': 'Вход выполнен!',
-            'role': 'student',
-            'redirect': '/student' # адрес переадрисации
-        }), 200
-    elif username == 'cook' and password == '123':
-        return jsonify({'status': 'success', 'role': 'cook', 'redirect': '/cook'}), 200
-    else:
-        # Не угадали логин или пароль
-        return jsonify({'status': 'error', 'message': 'Неверный логин или пароль'}), 401
 if __name__ == '__main__':
     app.run(debug=True)
