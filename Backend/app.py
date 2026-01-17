@@ -19,8 +19,17 @@ app.secret_key = 'super_secret_key_for_school_canteen'
 
 def get_db_connection():
     conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row  # Позволяет брать поля по имени
+    conn.row_factory = sqlite3.Row
     return conn
+
+
+# --- Вспомогательная функция перенаправления ---
+def redirect_to_role_page():
+    role = session.get('role')
+    if role == 'student': return redirect('/student')
+    if role == 'cook': return redirect('/cook')
+    if role == 'admin': return redirect('/admin')
+    return redirect('/login')
 
 
 # ========================
@@ -43,26 +52,29 @@ def login():
 def register():
     if 'user_id' in session:
         return redirect_to_role_page()
-    return render_template('register.html')
+    return render_template('login.html')  # Используем тот же шаблон, там есть переключатель
 
 
-# --- Защищенные кабинеты ---
+# --- Защищенные кабинеты (RBAC) ---
 
 @app.route('/student')
 def student_dashboard():
     if 'user_id' not in session: return redirect(url_for('login', next=flask_request.path))
+    if session.get('role') != 'student': return redirect_to_role_page()
     return render_template('student.html')
 
 
 @app.route('/cook')
 def cook_dashboard():
     if 'user_id' not in session: return redirect(url_for('login', next=flask_request.path))
+    if session.get('role') != 'cook': return redirect_to_role_page()
     return render_template('cook.html')
 
 
 @app.route('/admin')
 def admin_dashboard():
     if 'user_id' not in session: return redirect(url_for('login', next=flask_request.path))
+    if session.get('role') != 'admin': return redirect_to_role_page()
     return render_template('admin.html')
 
 
@@ -74,28 +86,25 @@ def logout():
 
 # --- Статика ---
 @app.route('/css/<path:filename>')
-def serve_css(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
+def serve_css(filename): return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
 
 
 @app.route('/js/<path:filename>')
-def serve_js(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
+def serve_js(filename): return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
+
 
 @app.route('/assets/<path:filename>')
-def serve_assets(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'assets'), filename)
+def serve_assets(filename): return send_from_directory(os.path.join(frontend_dir, 'assets'), filename)
 
 
 # ========================
 # API
 # ========================
 
-# 1. Вход в систему
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = flask_request.get_json()
-    email = data.get('username', '').strip()  # С фронта приходит как username
+    email = data.get('username', '').strip()
     password = data.get('password')
     next_url = data.get('next_url')
 
@@ -106,28 +115,31 @@ def api_login():
     if user and check_password_hash(user['password_hash'], password):
         session['user_id'] = user['id']
         session['role'] = user['role']
-        target = next_url if next_url else f"/{user['role']}"
+
+        # Если пользователь пытался попасть на конкретную страницу (next_url),
+        # мы проверяем, имеет ли он право туда идти.
+        # Для простоты: если роль совпадает с началом URL или next_url пуст -> переходим
+        if next_url and next_url.startswith(f"/{user['role']}"):
+            target = next_url
+        else:
+            target = f"/{user['role']}"
+
         return jsonify({'status': 'success', 'redirect': target}), 200
     else:
         return jsonify({'status': 'error', 'message': 'Неверная почта или пароль'}), 401
 
 
-# 2. Регистрация
 @app.route('/api/register', methods=['POST'])
 def api_register():
     data = flask_request.get_json()
-
     email = data.get('email', '').strip()
     username = data.get('username', '').strip()
     password = data.get('password')
     confirm = data.get('confirm_password')
-
-    # Получаем список аллергенов (по умолчанию пустой список)
-    allergens = data.get('allergens', [])
+    allergens = data.get('allergens', [])  # Список аллергенов
 
     if not username or not password or not email:
-        return jsonify({'status': 'error', 'message': 'Заполните основные поля'}), 400
-
+        return jsonify({'status': 'error', 'message': 'Заполните все поля'}), 400
     if password != confirm:
         return jsonify({'status': 'error', 'message': 'Пароли не совпадают'}), 400
 
@@ -139,8 +151,6 @@ def api_register():
         return jsonify({'status': 'error', 'message': 'Почта уже занята'}), 400
 
     hashed = generate_password_hash(password)
-
-    # Превращаем список ['рыба', 'молоко'] в строку '["рыба", "молоко"]' для SQLite
     allergens_json = json.dumps(allergens)
 
     try:
@@ -148,94 +158,74 @@ def api_register():
             INSERT INTO users (username, email, password_hash, role, allergens) 
             VALUES (?, ?, ?, ?, ?)
         ''', (username, email, hashed, 'student', allergens_json))
-
         new_id = cur.lastrowid
         conn.commit()
-    except Exception as e:
+    except:
         conn.close()
-        print(f"Error: {e}")
-        return jsonify({'status': 'error', 'message': 'Ошибка записи в БД'}), 500
+        return jsonify({'status': 'error', 'message': 'Ошибка БД'}), 500
 
     conn.close()
-
-    # Авто-вход
     session['user_id'] = new_id
     session['role'] = 'student'
-
     return jsonify({'status': 'success', 'redirect': '/student'}), 200
 
 
-# 3. Получить список блюд (для повара)
 @app.route('/api/dishes', methods=['GET'])
 def get_dishes():
     conn = get_db_connection()
     dishes = conn.execute('SELECT * FROM dishes').fetchall()
     conn.close()
-
     result = []
     for d in dishes:
-        dish_dict = dict(d)
-        # Распаковываем JSON
+        dish = dict(d)
         try:
-            dish_dict['ingredients'] = json.loads(dish_dict['ingredients'])
+            dish['ingredients'] = json.loads(dish['ingredients'])
         except:
-            dish_dict['ingredients'] = []
+            dish['ingredients'] = []
         try:
-            dish_dict['reviews'] = json.loads(dish_dict['reviews'])
+            dish['reviews'] = json.loads(dish['reviews'])
         except:
-            dish_dict['reviews'] = []
-        result.append(dish_dict)
-
+            dish['reviews'] = []
+        result.append(dish)
     return jsonify(result), 200
 
 
-# 4. Выдать питание (списать со склада)
 @app.route('/api/issue_meal', methods=['POST'])
 def issue_meal():
+    # Только повар (или админ) может выдавать еду!
+    if session.get('role') not in ['cook', 'admin']:
+        return jsonify({'status': 'error', 'message': 'Нет прав'}), 403
+
     data = flask_request.get_json()
     dish_id = data.get('dish_id')
     student_ident = str(data.get('student_identifier')).strip()
 
     conn = get_db_connection()
-
-    # Проверка блюда
     dish = conn.execute('SELECT * FROM dishes WHERE id = ?', (dish_id,)).fetchone()
+
     if not dish:
         conn.close()
         return jsonify({'status': 'error', 'message': 'Блюдо не найдено'}), 404
-
     if dish['stock_quantity'] <= 0:
         conn.close()
-        return jsonify({'status': 'error', 'message': f'"{dish["name"]}" закончилось!'}), 400
+        return jsonify({'status': 'error', 'message': 'Блюдо закончилось'}), 400
 
-    # Проверка ученика (ID, email или username)
     student = conn.execute('SELECT * FROM users WHERE id = ? OR email = ? OR username = ?',
                            (student_ident, student_ident, student_ident)).fetchone()
-
     if not student:
         conn.close()
         return jsonify({'status': 'error', 'message': 'Ученик не найден'}), 404
 
-    # Списание
     try:
         conn.execute('UPDATE dishes SET stock_quantity = stock_quantity - 1 WHERE id = ?', (dish_id,))
         conn.commit()
         new_stock = dish['stock_quantity'] - 1
     except:
         conn.close()
-        return jsonify({'status': 'error', 'message': 'Ошибка записи'}), 500
+        return jsonify({'status': 'error', 'message': 'Ошибка БД'}), 500
 
     conn.close()
-    return jsonify({
-        'status': 'success',
-        'message': f'Выдано: {dish["name"]} для {student["username"]}',
-        'new_stock': new_stock
-    }), 200
-
-
-def redirect_to_role_page():
-    role = session.get('role')
-    return redirect(f"/{role}") if role else redirect('/')
+    return jsonify({'status': 'success', 'message': f'Выдано: {dish["name"]}', 'new_stock': new_stock}), 200
 
 
 if __name__ == '__main__':
