@@ -1,119 +1,79 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- ЛОГИКА ВХОДА (LOGIN) ---
+    // LOGIN
     const loginForm = document.getElementById('loginForm');
-
     if (loginForm) {
-        loginForm.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Остановить перезагрузку
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('message');
+            // Backend ждет поле username, даже если это email
+            const user = document.getElementById('username') || document.getElementById('email');
+            const pass = document.getElementById('password');
+            const next = new URLSearchParams(window.location.search).get('next');
 
-            const messageBox = document.getElementById('message');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-
-            // Проверка URL на наличие параметра ?next=/somewhere
-            const urlParams = new URLSearchParams(window.location.search);
-            const nextParam = urlParams.get('next');
-
-            messageBox.textContent = 'Вход в систему...';
-            messageBox.style.color = 'gray';
+            msg.textContent = "Вход...";
+            msg.style.color = "gray";
 
             try {
-                const response = await fetch('/api/login', {
+                const res = await fetch('/api/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        username: usernameInput.value,
-                        password: passwordInput.value,
-                        next_url: nextParam
+                        username: user.value,
+                        password: pass.value,
+                        next_url: next
                     })
                 });
+                const data = await res.json();
 
-                const result = await response.json();
-
-                if (response.ok) {
-                    messageBox.textContent = 'Успешно! Перенаправление...';
-                    messageBox.style.color = 'green';
-
-                    setTimeout(() => {
-                        window.location.href = result.redirect;
-                    }, 500);
+                if (res.ok) {
+                    msg.textContent = "Успешно!";
+                    msg.style.color = "green";
+                    window.location.href = data.redirect;
                 } else {
-                    messageBox.textContent = result.message;
-                    messageBox.style.color = 'red';
+                    msg.textContent = data.message;
+                    msg.style.color = "red";
                 }
-
-            } catch (error) {
-                console.error('Login Error:', error);
-                messageBox.textContent = 'Ошибка соединения с сервером';
-                messageBox.style.color = 'red';
-            }
+            } catch (e) { console.error(e); }
         });
     }
 
-    // --- ЛОГИКА РЕГИСТРАЦИИ (REGISTER) ---
-    const registerForm = document.getElementById('registerForm');
+    // REGISTER
+    const regForm = document.getElementById('registerForm');
+    if (regForm) {
+        regForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('message');
+            const email = document.getElementById('email').value;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const conf = document.getElementById('confirm_password').value;
 
-    if (registerForm) {
-        registerForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const messageBox = document.getElementById('message');
-
-            // Сбор данных из формы
-            const emailVal = document.getElementById('email').value;
-            const usernameVal = document.getElementById('username').value;
-            const fullNameVal = document.getElementById('full_name').value;
-            const passwordVal = document.getElementById('password').value;
-            const confirmVal = document.getElementById('confirm_password').value;
-
-            // Простая проверка на клиенте
-            if (passwordVal !== confirmVal) {
-                messageBox.textContent = 'Пароли не совпадают!';
-                messageBox.style.color = 'red';
+            if (pass !== conf) {
+                msg.textContent = "Пароли не совпадают";
+                msg.style.color = "red";
                 return;
             }
 
-            messageBox.textContent = 'Регистрация...';
-            messageBox.style.color = 'gray';
+            msg.textContent = "Регистрация...";
 
             try {
-                const response = await fetch('/api/register', {
+                const res = await fetch('/api/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: emailVal,
-                        username: usernameVal,
-                        full_name: fullNameVal,
-                        password: passwordVal,
-                        confirm_password: confirmVal
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, username: user, password: pass, confirm_password: conf })
                 });
+                const data = await res.json();
 
-                const result = await response.json();
-
-                if (response.ok) {
-                    messageBox.textContent = 'Успешно! Вход в кабинет...';
-                    messageBox.style.color = 'green';
-
-                    setTimeout(() => {
-                        window.location.href = result.redirect;
-                    }, 1000);
+                if (res.ok) {
+                    msg.textContent = "Готово!";
+                    msg.style.color = "green";
+                    setTimeout(() => window.location.href = data.redirect, 1000);
                 } else {
-                    messageBox.textContent = result.message;
-                    messageBox.style.color = 'red';
+                    msg.textContent = data.message;
+                    msg.style.color = "red";
                 }
-
-            } catch (error) {
-                console.error('Register Error:', error);
-                messageBox.textContent = 'Ошибка соединения с сервером';
-                messageBox.style.color = 'red';
-            }
+            } catch (e) { console.error(e); }
         });
     }
-
 });

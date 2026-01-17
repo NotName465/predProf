@@ -1,106 +1,140 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. ЛОГИКА ВКЛАДОК (TABS) ---
+    // --- ЛОГИКА ТАБОВ ---
     const tabs = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Убираем активный класс у всех
-            tabs.forEach(t => t.classList.remove('active'));
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabs.forEach(b => b.classList.remove('active'));
             contents.forEach(c => c.classList.remove('active'));
-
-            // Добавляем активный класс нажатой кнопке
-            tab.classList.add('active');
-
-            // Показываем нужный контент
-            const tabId = tab.getAttribute('data-tab');
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
             document.getElementById(tabId).classList.add('active');
         });
     });
 
-    // --- 2. ЛОГИКА БАЗЫ ДАННЫХ (ВЫПАДАЮЩИЙ СПИСОК) ---
-    const dishSelect = document.getElementById('dishSelect');
-    const dishCard = document.getElementById('dishCard');
+    // --- ПЕРЕМЕННЫЕ ---
+    let allDishes = [];
+    const mealSelect = document.getElementById('mealSelect');
+    const inventorySelect = document.getElementById('inventorySelect');
 
-    // Элементы карточки
+    // Элементы карточки ВЫДАЧИ
+    const mealInfoCard = document.getElementById('mealInfoCard');
+    const mealInfoName = document.getElementById('mealInfoName');
+    const mealInfoStock = document.getElementById('mealInfoStock');
+    const mealInfoCalories = document.getElementById('mealInfoCalories');
+    const mealInfoImage = document.getElementById('mealInfoImage');
+    const mealInfoIng = document.getElementById('mealInfoIng');
+
+    // Элементы карточки СКЛАДА
+    const dishCard = document.getElementById('dishCard');
     const cardName = document.getElementById('cardName');
     const cardStock = document.getElementById('cardStock');
     const cardCalories = document.getElementById('cardCalories');
     const cardImage = document.getElementById('cardImage');
     const cardIngredients = document.getElementById('cardIngredients');
 
-    // Переменная для хранения всех загруженных блюд
-    let allDishes = [];
-
-    // Функция загрузки данных с сервера
+    // --- ЗАГРУЗКА ДАННЫХ ---
     async function loadDishes() {
         try {
-            const response = await fetch('/api/dishes');
-            if (!response.ok) throw new Error('Ошибка сети');
-
-            allDishes = await response.json();
-
-            // Очищаем список
-            dishSelect.innerHTML = '<option value="">-- Выберите блюдо --</option>';
-
-            // Заполняем список
-            allDishes.forEach(dish => {
-                const option = document.createElement('option');
-                option.value = dish.id; // ID из базы
-                option.textContent = dish.name;
-                dishSelect.appendChild(option);
-            });
-
-        } catch (error) {
-            console.error(error);
-            dishSelect.innerHTML = '<option>Ошибка загрузки данных</option>';
-        }
+            const res = await fetch('/api/dishes');
+            if (res.ok) {
+                allDishes = await res.json();
+                updateDropdowns();
+            }
+        } catch (e) { console.error("Ошибка загрузки:", e); }
     }
 
-    // Загружаем данные сразу при открытии страницы
+    function updateDropdowns() {
+        const savedMeal = mealSelect.value;
+        const savedInv = inventorySelect.value;
+
+        const html = '<option value="">-- Выберите блюдо --</option>' +
+            allDishes.map(d => `<option value="${d.id}">${d.name} (${d.stock_quantity} шт)</option>`).join('');
+
+        mealSelect.innerHTML = html;
+        inventorySelect.innerHTML = html;
+
+        mealSelect.value = savedMeal;
+        inventorySelect.value = savedInv;
+    }
+
     loadDishes();
 
-    // Слушаем изменение выбора в списке
-    dishSelect.addEventListener('change', function() {
-        const selectedId = this.value;
+    // --- ПОКАЗ КАРТОЧКИ ---
+    function showCard(dishId, isIssue) {
+        const dish = allDishes.find(d => d.id == dishId);
+        const card = isIssue ? mealInfoCard : dishCard;
 
-        if (!selectedId) {
-            dishCard.style.display = 'none';
-            return;
-        }
+        if (!dish) { card.style.display = 'none'; return; }
+        card.style.display = 'block';
 
-        // Ищем выбранное блюдо в массиве allDishes
-        // (Обратите внимание: id в select это строка, а в базе число, поэтому ==)
-        const dish = allDishes.find(d => d.id == selectedId);
-
-        if (dish) {
-            // Заполняем карточку данными
+        if (isIssue) {
+            mealInfoName.textContent = dish.name;
+            mealInfoStock.textContent = dish.stock_quantity;
+            mealInfoCalories.textContent = dish.calories;
+            mealInfoIng.textContent = dish.ingredients.join(', ');
+            if(dish.image_url) mealInfoImage.style.backgroundImage = `url('${dish.image_url}')`;
+            else mealInfoImage.style.background = '#eee';
+        } else {
             cardName.textContent = dish.name;
             cardStock.textContent = dish.stock_quantity;
             cardCalories.textContent = dish.calories;
+            cardIngredients.innerHTML = dish.ingredients.map(i => `<li>${i}</li>`).join('');
+            if(dish.image_url) cardImage.style.backgroundImage = `url('${dish.image_url}')`;
+            else cardImage.style.background = '#eee';
+        }
+    }
 
-            // Если есть картинка
-            if (dish.image_url) {
-                cardImage.style.backgroundImage = `url('${dish.image_url}')`;
+    mealSelect.addEventListener('change', (e) => showCard(e.target.value, true));
+    inventorySelect.addEventListener('change', (e) => showCard(e.target.value, false));
+
+    // --- ВЫДАЧА ПИТАНИЯ ---
+    const btnIssue = document.getElementById('btnIssue');
+    const msg = document.getElementById('issueMessage');
+    const studentInp = document.getElementById('studentId');
+
+    btnIssue.addEventListener('click', async () => {
+        const dishId = mealSelect.value;
+        const student = studentInp.value.trim();
+
+        if (!dishId || !student) {
+            msg.textContent = "⚠️ Выберите блюдо и введите ученика!";
+            msg.style.color = "#d32f2f";
+            return;
+        }
+
+        msg.textContent = "⏳ Обработка...";
+        msg.style.color = "gray";
+
+        try {
+            const res = await fetch('/api/issue_meal', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ dish_id: dishId, student_identifier: student })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                msg.textContent = `✅ ${data.message}`;
+                msg.style.color = "#388e3c";
+                studentInp.value = '';
+
+                const dish = allDishes.find(d => d.id == dishId);
+                if (dish) {
+                    dish.stock_quantity = data.new_stock;
+                    updateDropdowns();
+                    showCard(dishId, true);
+                    mealSelect.value = dishId;
+                }
             } else {
-                cardImage.style.background = '#ccc';
+                msg.textContent = `❌ ${data.message}`;
+                msg.style.color = "#d32f2f";
             }
-
-            // Заполняем ингредиенты
-            cardIngredients.innerHTML = ''; // Очистить старые
-            if (dish.ingredients && Array.isArray(dish.ingredients)) {
-                dish.ingredients.forEach(ing => {
-                    const li = document.createElement('li');
-                    li.textContent = ing;
-                    cardIngredients.appendChild(li);
-                });
-            } else {
-                cardIngredients.innerHTML = '<li>Нет данных</li>';
-            }
-
-            // Показываем карточку
-            dishCard.style.display = 'block';
+        } catch (e) {
+            msg.textContent = "❌ Ошибка соединения";
+            msg.style.color = "#d32f2f";
         }
     });
 });
