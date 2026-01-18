@@ -7,7 +7,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 # --- Настройка путей ---
 basedir = os.path.dirname(os.path.abspath(__file__))
-frontend_dir = os.path.join(basedir, '../frontend')
+frontend_dir = os.path.join(basedir, '../Frontend')  # Исправлено: Frontend с большой F
 db_path = os.path.join(basedir, '../database/school_canteen.db')
 
 app = Flask(__name__,
@@ -52,7 +52,7 @@ def login():
 def register():
     if 'user_id' in session:
         return redirect_to_role_page()
-    return render_template('login.html')  # Используем тот же шаблон, там есть переключатель
+    return render_template('login.html')
 
 
 # --- Защищенные кабинеты (RBAC) ---
@@ -115,10 +115,8 @@ def api_login():
     if user and check_password_hash(user['password_hash'], password):
         session['user_id'] = user['id']
         session['role'] = user['role']
+        session['username'] = user['username']
 
-        # Если пользователь пытался попасть на конкретную страницу (next_url),
-        # мы проверяем, имеет ли он право туда идти.
-        # Для простоты: если роль совпадает с началом URL или next_url пуст -> переходим
         if next_url and next_url.startswith(f"/{user['role']}"):
             target = next_url
         else:
@@ -136,7 +134,7 @@ def api_register():
     username = data.get('username', '').strip()
     password = data.get('password')
     confirm = data.get('confirm_password')
-    allergens = data.get('allergens', [])  # Список аллергенов
+    allergens = data.get('allergens', [])  # Список ID ингредиентов-аллергенов
 
     if not username or not password or not email:
         return jsonify({'status': 'error', 'message': 'Заполните все поля'}), 400
@@ -151,41 +149,63 @@ def api_register():
         return jsonify({'status': 'error', 'message': 'Почта уже занята'}), 400
 
     hashed = generate_password_hash(password)
-    allergens_json = json.dumps(allergens)
 
     try:
+        # Создаем пользователя (БЕЗ поля allergens - его нет в новой схеме!)
         cur = conn.execute('''
-            INSERT INTO users (username, email, password_hash, role, allergens) 
-            VALUES (?, ?, ?, ?, ?)
-        ''', (username, email, hashed, 'student', allergens_json))
+            INSERT INTO users (username, email, password_hash, role) 
+            VALUES (?, ?, ?, ?)
+        ''', (username, email, hashed, 'student'))
         new_id = cur.lastrowid
+
+        # Добавляем аллергены в отдельную таблицу allergens
+        if allergens:
+            for ingredient_id in allergens:
+                conn.execute('''
+                    INSERT INTO allergens (user_id, ingredient_id, note)
+                    VALUES (?, ?, 'Указано при регистрации')
+                ''', (new_id, ingredient_id))
+
         conn.commit()
-    except:
+    except Exception as e:
         conn.close()
+        print(f"Ошибка регистрации: {e}")  # Для отладки
         return jsonify({'status': 'error', 'message': 'Ошибка БД'}), 500
 
     conn.close()
     session['user_id'] = new_id
     session['role'] = 'student'
+    session['username'] = username
     return jsonify({'status': 'success', 'redirect': '/student'}), 200
 
 
 @app.route('/api/dishes', methods=['GET'])
 def get_dishes():
     conn = get_db_connection()
-    dishes = conn.execute('SELECT * FROM dishes').fetchall()
+
+    # НОВЫЙ ЗАПРОС для новой схемы
+    dishes = conn.execute('''
+        SELECT d.*, 
+               GROUP_CONCAT(DISTINCT i.name) as ingredient_names
+        FROM dishes d
+        LEFT JOIN dish_ingredients di ON d.id = di.dish_id
+        LEFT JOIN ingredients i ON di.ingredient_id = i.id
+        GROUP BY d.id
+    ''').fetchall()
+
     conn.close()
     result = []
     for d in dishes:
         dish = dict(d)
-        try:
-            dish['ingredients'] = json.loads(dish['ingredients'])
-        except:
-            dish['ingredients'] = []
-        try:
-            dish['reviews'] = json.loads(dish['reviews'])
-        except:
-            dish['reviews'] = []
+        # Ингредиенты из отдельной таблицы
+        dish['ingredients'] = d['ingredient_names'].split(',') if d['ingredient_names'] else []
+
+        # Отзывы нужно получать отдельно (можно оставить пустым или добавить запрос)
+        dish['reviews'] = []
+
+        # Для совместимости со старым фронтендом добавляем stock_quantity
+        dish['stock_quantity'] = dish.get('current_stock', 0)
+
         result.append(dish)
     return jsonify(result), 200
 
@@ -201,12 +221,16 @@ def issue_meal():
     student_ident = str(data.get('student_identifier')).strip()
 
     conn = get_db_connection()
+
+    # Ищем блюдо по новому имени поля
     dish = conn.execute('SELECT * FROM dishes WHERE id = ?', (dish_id,)).fetchone()
 
     if not dish:
         conn.close()
         return jsonify({'status': 'error', 'message': 'Блюдо не найдено'}), 404
-    if dish['stock_quantity'] <= 0:
+
+    # Используем current_stock вместо stock_quantity
+    if dish['current_stock'] <= 0:
         conn.close()
         return jsonify({'status': 'error', 'message': 'Блюдо закончилось'}), 400
 
@@ -217,16 +241,84 @@ def issue_meal():
         return jsonify({'status': 'error', 'message': 'Ученик не найден'}), 404
 
     try:
-        conn.execute('UPDATE dishes SET stock_quantity = stock_quantity - 1 WHERE id = ?', (dish_id,))
+        # Обновляем current_stock вместо stock_quantity
+        conn.execute('UPDATE dishes SET current_stock = current_stock - 1 WHERE id = ?', (dish_id,))
         conn.commit()
-        new_stock = dish['stock_quantity'] - 1
-    except:
+        new_stock = dish['current_stock'] - 1
+    except Exception as e:
         conn.close()
+        print(f"Ошибка выдачи еды: {e}")  # Для отладки
         return jsonify({'status': 'error', 'message': 'Ошибка БД'}), 500
 
     conn.close()
     return jsonify({'status': 'success', 'message': f'Выдано: {dish["name"]}', 'new_stock': new_stock}), 200
 
 
+# ========================
+# ТЕСТОВЫЕ ЭНДПОИНТЫ ДЛЯ ОТЛАДКИ
+# ========================
+
+@app.route('/api/debug/users', methods=['GET'])
+def debug_users():
+    """Просмотр всех пользователей (для отладки)"""
+    conn = get_db_connection()
+    users = conn.execute('SELECT id, username, email, role FROM users').fetchall()
+    conn.close()
+    return jsonify([dict(user) for user in users]), 200
+
+
+@app.route('/api/debug/tables', methods=['GET'])
+def debug_tables():
+    """Информация о таблицах (для отладки)"""
+    conn = get_db_connection()
+
+    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+
+    result = {}
+    for table in tables:
+        count = conn.execute(f'SELECT COUNT(*) as cnt FROM {table["name"]}').fetchone()['cnt']
+        result[table['name']] = count
+
+    conn.close()
+    return jsonify(result), 200
+
+
+@app.route('/api/debug/reset-test', methods=['POST'])
+def reset_test_data():
+    """Сброс тестовых данных (для разработки)"""
+    # Внимание: удаляет все пользователи кроме тестовых!
+    conn = get_db_connection()
+
+    try:
+        # Удаляем всех пользователей кроме тестовых
+        conn.execute(
+            "DELETE FROM users WHERE email NOT IN ('student@school.ru', 'student2@school.ru', 'cook@school.ru', 'admin@school.ru')")
+
+        # Удаляем связанные данные
+        conn.execute("DELETE FROM allergens WHERE user_id NOT IN (SELECT id FROM users)")
+        conn.execute("DELETE FROM orders WHERE user_id NOT IN (SELECT id FROM users)")
+
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'message': 'Тестовые данные сброшены'}), 200
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': f'Ошибка: {str(e)}'}), 500
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    print("=" * 60)
+    print("ШКОЛЬНАЯ СТОЛОВАЯ - Flask сервер")
+    print("=" * 60)
+    print(f"База данных: {db_path}")
+    print(f"Существует: {os.path.exists(db_path)}")
+    print("=" * 60)
+    print("Сервер запущен: http://localhost:5000")
+    print("=" * 60)
+    print("Эндпоинты для отладки:")
+    print("  GET  /api/debug/users - все пользователи")
+    print("  GET  /api/debug/tables - статистика таблиц")
+    print("  POST /api/debug/reset-test - сброс тестовых данных")
+    print("=" * 60)
+
+    app.run(debug=True, port=5000)
