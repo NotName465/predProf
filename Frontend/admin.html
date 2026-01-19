@@ -1,11 +1,105 @@
-<!-- Панель админа -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Администратор — Столовая Школа 2098</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Candara, sans-serif; }
+        body { background: linear-gradient(135deg, #e3f2fd, #ffffff); color: #333; min-height: 100vh; padding-top: 70px; }
+        .shapka { background: white; padding: 15px 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; width: 100%; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .menu-toggle { display: none; background: #2196F3; color: white; border: none; width: 40px; height: 40px; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .title { color: #0d47a1; font-size: 20px; font-weight: bold; text-align: center; flex-grow: 1; margin: 0 10px; }
+        .main-layout { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 15px 30px; }
+        .left-panel { width: 220px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+        .prof { background: #2196F3; color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3); }
+        .head { margin-bottom: 20px; padding: 10px; background: #e3f2fd; color: #0d47a1; border-radius: 10px; text-align: center; width: 100%; }
+        .head h1 { font-size: 18px; margin: 0; font-weight: bold; }
+        .tabs { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        .tab-btn { padding: 12px; border: none; background: #f5f9ff; border-radius: 12px; cursor: pointer; text-align: left; font-weight: bold; color: #555; transition: all 0.2s; }
+        .tab-btn:hover { background: #d0e6ff; }
+        .tab-btn.active { background: #2196F3; color: white; }
+        .center-content { flex: 1; display: flex; justify-content: center; }
+        .content { width: 100%; max-width: 600px; }
+        .tab-content { display: none; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .tab-content.active { display: block; }
+        label { display: block; margin: 18px 0 10px; font-weight: 600; color: #0d47a1; font-size: 16px; }
+        input, button, select { padding: 12px 16px; margin: 6px 0; border: 2px solid #ccc; border-radius: 12px; font-size: 16px; width: 100%; max-width: 320px; background: white; transition: border-color 0.3s, box-shadow 0.3s; }
+        input:focus, select:focus { outline: none; border-color: #2196F3; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); }
+        button { background: #2196F3; color: white; border: none; cursor: pointer; font-weight: bold; transition: background 0.2s; width: auto; padding: 12px 28px; font-size: 17px; border-radius: 50px; }
+        button:hover { background: #1976D2; }
+        ul { padding-left: 20px; margin: 12px 0; }
+        li { margin: 8px 0; font-size: 16px; }
+        hr { margin: 24px 0; border: none; border-top: 1px solid #eee; }
+
+        @media (max-width: 768px) {
+            .shapka { padding: 12px 15px; }
+            .title { font-size: 18px; }
+            .menu-toggle { display: block; }
+            .left-panel { position: fixed; top: 70px; left: -250px; height: calc(100vh - 70px); z-index: 90; transition: left 0.3s ease; overflow-y: auto; width: 230px; padding: 20px; border-radius: 0 16px 16px 0; }
+            .left-panel.open { left: 0; }
+            .main-layout { display: block; padding: 0 10px 20px; }
+            .center-content { margin-top: 20px; }
+            .content { max-width: 100%; }
+            input, button, select { max-width: 100%; font-size: 17px; padding: 14px; }
+            label { font-size: 17px; }
+        }
+    </style>
 </head>
 <body>
 
+    <header class="shapka">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <h1 class="title">Столовая — Школа 2098</h1>
+    </header>
+
+    <div class="main-layout">
+        <aside class="left-panel" id="leftPanel">
+            <button class="prof" onclick="window.location.href='/logout'"></button>
+            <header class="head">
+                <h1>Панель администратора</h1>
+            </header>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="stats">Статистика</button>
+                <button class="tab-btn" data-tab="requests">Закупки</button>
+                <button class="tab-btn" data-tab="reports">Отчёты</button>
+            </nav>
+        </aside>
+
+        <div class="center-content">
+            <main class="content">
+                <div id="stats" class="tab-content active">
+                    <h2>Статистика за сегодня</h2>
+                    <p>Обзор посещаемости и оплат.</p>
+                    <ul id="statsList"></ul>
+                </div>
+
+                <div id="requests" class="tab-content">
+                    <h2>Заявки на закупку</h2>
+                    <ul id="requestsList" style="list-style: none; padding: 0;"></ul>
+                    <p id="noRequests" style="display:none; color:#666;">Нет новых заявок.</p>
+                </div>
+
+                <div id="reports" class="tab-content">
+                    <h2>Отчёты (Выручка)</h2>
+                    <p>Сводная информация за последние дни.</p>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                            <thead>
+                                <tr style="background:#e3f2fd; text-align:left;">
+                                    <th style="padding:10px;">Дата</th>
+                                    <th style="padding:10px;">Выручка</th>
+                                    <th style="padding:10px;">Транзакций</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
 </body>
 </html>
