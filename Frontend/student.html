@@ -1,20 +1,1104 @@
-student,html:
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Кабинет ученика</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ученик - Столовая Школа 2098</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Candara, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #e3f2fd, #ffffff);
+      color: #333;
+      min-height: 100vh;
+      padding-top: 70px;
+    }
+
+    .shapka {
+      background: white;
+      padding: 12px 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .prof {
+      background: #2196F3;
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zagolovok_shapki {
+      color: #0d47a1;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      flex-grow: 1;
+      margin: 0 10px;
+    }
+
+    .osnovnoe {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 30px;
+    }
+
+    .karta {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .zagolovok_karty {
+      color: #0d47a1;
+      font-size: 20px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .menu-dish {
+      padding: 12px;
+      border-radius: 12px;
+      background: #f5f9ff;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .menu-dish:hover {
+      background: #e3f2fd;
+      transform: translateY(-2px);
+    }
+
+    .menu-dish.allergen-warning {
+      border: 2px solid #f44336;
+      background: #ffebee;
+    }
+
+    .dish-name {
+      font-weight: 600;
+      color: #0d47a1;
+      flex: 1;
+    }
+
+    .dish-name.allergen-name {
+      color: #c62828;
+    }
+
+    .dish-type {
+      background: #2196F3;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 15px;
+      margin-left: 10px;
+    }
+
+    .dish-type.breakfast {
+      background: #2196F3;
+    }
+
+    .dish-type.lunch {
+      background: #4CAF50;
+    }
+
+    .dish-stock {
+      font-size: 14px;
+      color: #666;
+      margin-left: 10px;
+    }
+
+    .dish-stock.low {
+      color: #ff9800;
+      font-weight: bold;
+    }
+
+    .dish-stock.out {
+      color: #f44336;
+      font-weight: bold;
+    }
+
+    .knopka {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 17px;
+      cursor: pointer;
+      transition: background 0.2s;
+      min-height: 48px;
+      width: 100%;
+    }
+
+    .knopka:hover {
+      background: #1976D2;
+    }
+
+    .knopka:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .knopka-success {
+      background: #4CAF50;
+    }
+
+    .knopka-success:hover {
+      background: #388E3C;
+    }
+
+    .knopka-abonement {
+      background: #FF9800;
+      margin-top: 16px;
+    }
+
+    .knopka-abonement:hover {
+      background: #F57C00;
+    }
+
+    .knopka-purple {
+      background: #9C27B0;
+    }
+
+    .knopka-purple:hover {
+      background: #7B1FA2;
+    }
+
+    .istoriya-zakazov {
+      font-size: 16px;
+      color: #555;
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+
+    .allergeny-spisok {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .allergen-metka {
+      background: #ffebee;
+      color: #c62828;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .oplata-blok {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .cena {
+      font-weight: bold;
+      color: #0d47a1;
+      margin: 12px 0 10px;
+      font-size: 16px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .status-active {
+      background: #c8e6c9;
+      color: #1b5e20;
+    }
+
+    .status-inactive {
+      background: #ffcdd2;
+      color: #c62828;
+    }
+
+    .subscription-info {
+      margin: 15px 0;
+      padding: 15px;
+      background: #f5f9ff;
+      border-radius: 12px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error {
+      text-align: center;
+      padding: 20px;
+      color: #f44336;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .username {
+      color: #0d47a1;
+      font-weight: 600;
+    }
+
+    /* Модальное окно */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      color: #0d47a1;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .allergen-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      margin: 5px 0;
+      background: #f5f5f5;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .allergen-checkbox:hover {
+      background: #e3f2fd;
+    }
+
+    .allergen-checkbox input[type="checkbox"] {
+      transform: scale(1.3);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .allergen-warning-box {
+      background: #ffcdd2;
+      color: #c62828;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .ingredient-list {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .ingredient-allergen {
+      color: #f44336;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .zagolovok_karty {
+        font-size: 18px;
+      }
+      .dish-name {
+        font-size: 16px;
+      }
+      .knopka {
+        font-size: 17px;
+      }
+      .modal-content {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div style="text-align: center; margin-top: 50px;">
-        <h1>Привет, Ученик! 👋</h1>
-        <p>Ты успешно авторизовался.</p>
-        <p>Здесь будет меню и заказы.</p>
-        <br>
-        <a href="/" style="color: blue; text-decoration: underline;">На главную</a>
-        <br><br>
-        <a href="/logout" style="color: red;">Выйти из аккаунта</a>
+
+  <div class="shapka">
+    <button class="prof" onclick="logout()">👤</button>
+    <div class="zagolovok_shapki">Столовая - Школа 2098</div>
+    <div class="user-info">
+      <span class="username" id="username">Загрузка...</span>
     </div>
+  </div>
+
+  <div class="osnovnoe">
+
+    <!-- Карточка меню -->
+    <div class="karta">
+      <h2 class="zagolovok_karty">Сегодняшнее меню</h2>
+      <div id="menuLoading" class="loading">Загрузка меню...</div>
+      <div id="menuContainer"></div>
+
+      <div class="oplata-blok" id="paymentBlock" style="display: none;">
+        <div id="breakfastPayment" class="payment-section">
+          <div class="cena" id="breakfastPrice">Завтрак: <span id="breakfastPriceValue">0</span> ₽</div>
+          <button class="knopka" id="btnOrderBreakfast" onclick="orderMeal('breakfast')">Заказать завтрак</button>
+        </div>
+
+        <div id="lunchPayment" class="payment-section" style="margin-top: 20px;">
+          <div class="cena" id="lunchPrice">Обед: <span id="lunchPriceValue">0</span> ₽</div>
+          <button class="knopka knopka-success" id="btnOrderLunch" onclick="orderMeal('lunch')">Заказать обед</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Карточка абонемента -->
+    <div class="karta">
+      <h2 class="zagolovok_karty">Моя подписка</h2>
+      <div class="subscription-info" id="subscriptionInfo">
+        <p>Загрузка информации о подписке...</p>
+      </div>
+      <button class="knopka knopka-abonement" id="btnBuySubscription" onclick="buySubscription()">Купить подписку на месяц</button>
+      <p style="margin-top: 12px; font-size: 14px; color: #666;">
+        Подписка дает право на бесплатные завтраки и обеды в течение месяца.
+      </p>
+    </div>
+
+    <!-- Карточка аллергенов -->
+    <div class="karta">
+      <h2 class="zagolovok_karty">Мои аллергены</h2>
+      <p>Блюда готовятся с учётом Ваших предпочтений.</p>
+      <div id="allergensLoading" class="loading">Загрузка аллергенов...</div>
+      <div id="allergensContainer" class="allergeny-spisok"></div>
+      <button class="knopka knopka-purple" onclick="showAllergenManager()" style="margin-top: 15px;">
+        Управление аллергенами
+      </button>
+    </div>
+
+    <!-- Карточка истории заказов -->
+    <div class="karta">
+      <h2 class="zagolovok_karty">История заказов</h2>
+      <div id="ordersLoading" class="loading">Загрузка истории заказов...</div>
+      <div id="ordersContainer"></div>
+    </div>
+
+  </div>
+
+  <!-- Модальное окно управления аллергенами -->
+  <div id="allergenModal" class="modal">
+    <div class="modal-content">
+      <h2 class="modal-title">Управление аллергенами</h2>
+      <p style="margin-bottom: 20px; color: #666;">Отметьте продукты, на которые у вас аллергия или непереносимость:</p>
+
+      <div id="allergenCheckboxes" style="margin-bottom: 25px; max-height: 300px; overflow-y: auto;">
+        <div class="loading">Загрузка списка продуктов...</div>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="knopka knopka-success" onclick="saveAllergens()">Сохранить</button>
+        <button class="knopka" onclick="hideAllergenManager()" style="background: #757575;">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Глобальные переменные
+    let userData = null;
+    let todayMenu = { breakfast: [], lunch: [] };
+    let userOrders = [];
+    let userAllergens = [];
+    let allIngredients = [];
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      checkAuth();
+      loadUserData();
+      loadTodayMenu();
+      loadOrders();
+      loadAllIngredients();
+    });
+
+    // Проверка авторизации
+    function checkAuth() {
+      fetch('/api/user/profile', {
+        credentials: 'include'
+      })
+      .then(response => {
+        if (!response.ok) {
+          window.location.href = '/login';
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === 'success') {
+          userData = data.user;
+          userAllergens = data.allergens || [];
+          updateUserInfo();
+        } else {
+          window.location.href = '/login';
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка проверки авторизации:', error);
+        window.location.href = '/login';
+      });
+    }
+
+    // Загрузка данных пользователя
+    function loadUserData() {
+      fetch('/api/user/profile', {
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          userData = data.user;
+          userAllergens = data.allergens || [];
+          updateUserInfo();
+          updateSubscriptionInfo();
+          updateAllergensDisplay();
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка загрузки данных пользователя:', error);
+      });
+    }
+
+    // Загрузка всех ингредиентов
+    function loadAllIngredients() {
+      fetch('/api/ingredients')
+        .then(response => response.json())
+        .then(ingredients => {
+          allIngredients = ingredients;
+        })
+        .catch(error => {
+          console.error('Ошибка загрузки ингредиентов:', error);
+        });
+    }
+
+    // Обновление информации о пользователе
+    function updateUserInfo() {
+      if (userData) {
+        document.getElementById('username').textContent = userData.username;
+      }
+    }
+
+    // Загрузка сегодняшнего меню
+    function loadTodayMenu() {
+      fetch('/api/menu/today', {
+        credentials: 'include'
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Ошибка загрузки меню');
+        }
+        return response.json();
+      })
+      .then(data => {
+        todayMenu = data;
+        displayMenu(data);
+      })
+      .catch(error => {
+        console.error('Ошибка загрузки меню:', error);
+        document.getElementById('menuLoading').innerHTML =
+          '<div class="error">Ошибка загрузки меню. Попробуйте позже.</div>';
+      });
+    }
+
+    // Отображение меню с подсветкой аллергенов
+    function displayMenu(menuData) {
+      const container = document.getElementById('menuContainer');
+      const loading = document.getElementById('menuLoading');
+
+      if (!menuData.breakfast || menuData.breakfast.length === 0) {
+        loading.innerHTML = '<p>Меню на сегодня еще не составлено.</p>';
+        return;
+      }
+
+      loading.style.display = 'none';
+
+      let html = '';
+      let breakfastTotal = 0;
+      let lunchTotal = 0;
+
+      // Получаем ID аллергенов пользователя
+      const userAllergenIds = userAllergens.map(a => a.id);
+
+      // Проверяем, какие прием пищи уже заказаны сегодня
+      const todayOrders = userOrders.filter(order =>
+        new Date(order.date).toDateString() === new Date().toDateString()
+      );
+
+      const hasOrderedBreakfast = todayOrders.some(order => order.meal_type === 'breakfast');
+      const hasOrderedLunch = todayOrders.some(order => order.meal_type === 'lunch');
+
+      // Завтрак
+      if (menuData.breakfast.length > 0) {
+        html += '<h3 style="color: #2196F3; margin: 20px 0 10px;">🍳 Завтрак</h3>';
+
+        // Находим самое дешевое блюдо на завтрак для расчета цены
+        const breakfastPrices = menuData.breakfast.map(d => d.price).filter(p => p > 0);
+        breakfastTotal = breakfastPrices.length > 0 ? Math.min(...breakfastPrices) : 0;
+
+        menuData.breakfast.forEach(dish => {
+          // Проверяем аллергены в блюде
+          let dishAllergenIds = [];
+          let hasAllergens = false;
+
+          if (userAllergenIds.length > 0 && dish.ingredients) {
+            dishAllergenIds = dish.ingredients
+              .filter(ing => userAllergenIds.includes(ing.id))
+              .map(ing => ing.id);
+            hasAllergens = dishAllergenIds.length > 0;
+          }
+
+          // Получаем названия аллергенных ингредиентов
+          const allergenNames = dish.ingredients
+            ?.filter(ing => userAllergenIds.includes(ing.id))
+            .map(ing => ing.name) || [];
+
+          // Определяем статус остатка
+          let stockText = '';
+          let stockClass = '';
+          if (dish.current_stock <= 0) {
+            stockText = 'Нет в наличии';
+            stockClass = 'out';
+          } else if (dish.current_stock < 10) {
+            stockText = `Осталось: ${dish.current_stock}`;
+            stockClass = 'low';
+          } else {
+            stockText = `В наличии: ${dish.current_stock}`;
+          }
+
+          // Формируем список ингредиентов с подсветкой аллергенов
+          let ingredientsHtml = 'Не указано';
+          if (dish.ingredients && dish.ingredients.length > 0) {
+            ingredientsHtml = dish.ingredients.map(ing => {
+              const isAllergen = userAllergenIds.includes(ing.id);
+              return isAllergen ?
+                `<span class="ingredient-allergen">${ing.name}</span>` :
+                ing.name;
+            }).join(', ');
+          }
+
+          html += `
+            <div class="menu-dish ${hasAllergens ? 'allergen-warning' : ''}">
+              <div style="flex: 1;">
+                <div class="dish-name ${hasAllergens ? 'allergen-name' : ''}">
+                  ${dish.dish_name}
+                  ${hasAllergens ? '🚫' : ''}
+                </div>
+                <div style="font-size: 14px; color: #666; margin-top: 5px;">
+                  ${dish.description || ''}
+                </div>
+                <div style="font-size: 14px; color: #666; margin-top: 5px;">
+                  🔥 ${dish.calories} ккал | 💰 ${dish.price} ₽
+                </div>
+                <div class="ingredient-list" style="margin-top: 5px;">
+                  <strong>Состав:</strong> ${ingredientsHtml}
+                </div>
+                ${hasAllergens ? `
+                  <div class="allergen-warning-box">
+                    ⚠️ <strong>Содержит ваши аллергены:</strong> ${allergenNames.join(', ')}
+                  </div>
+                ` : ''}
+              </div>
+              <span class="dish-type breakfast">завтрак</span>
+              <span class="dish-stock ${stockClass}">${stockText}</span>
+            </div>
+          `;
+        });
+
+        // Обновляем информацию о завтраке
+        document.getElementById('breakfastPriceValue').textContent = breakfastTotal;
+        document.getElementById('btnOrderBreakfast').disabled = hasOrderedBreakfast;
+        if (hasOrderedBreakfast) {
+          document.getElementById('btnOrderBreakfast').textContent = '✓ Уже заказано';
+          document.getElementById('btnOrderBreakfast').style.background = '#4CAF50';
+        }
+      }
+
+      // Обед
+      if (menuData.lunch.length > 0) {
+        html += '<h3 style="color: #4CAF50; margin: 20px 0 10px;">🍽️ Обед</h3>';
+
+        // Находим самое дешевое блюдо на обед для расчета цены
+        const lunchPrices = menuData.lunch.map(d => d.price).filter(p => p > 0);
+        lunchTotal = lunchPrices.length > 0 ? Math.min(...lunchPrices) : 0;
+
+        menuData.lunch.forEach(dish => {
+          // Проверяем аллергены в блюде
+          let dishAllergenIds = [];
+          let hasAllergens = false;
+
+          if (userAllergenIds.length > 0 && dish.ingredients) {
+            dishAllergenIds = dish.ingredients
+              .filter(ing => userAllergenIds.includes(ing.id))
+              .map(ing => ing.id);
+            hasAllergens = dishAllergenIds.length > 0;
+          }
+
+          // Получаем названия аллергенных ингредиентов
+          const allergenNames = dish.ingredients
+            ?.filter(ing => userAllergenIds.includes(ing.id))
+            .map(ing => ing.name) || [];
+
+          // Определяем статус остатка
+          let stockText = '';
+          let stockClass = '';
+          if (dish.current_stock <= 0) {
+            stockText = 'Нет в наличии';
+            stockClass = 'out';
+          } else if (dish.current_stock < 10) {
+            stockText = `Осталось: ${dish.current_stock}`;
+            stockClass = 'low';
+          } else {
+            stockText = `В наличии: ${dish.current_stock}`;
+          }
+
+          // Формируем список ингредиентов с подсветкой аллергенов
+          let ingredientsHtml = 'Не указано';
+          if (dish.ingredients && dish.ingredients.length > 0) {
+            ingredientsHtml = dish.ingredients.map(ing => {
+              const isAllergen = userAllergenIds.includes(ing.id);
+              return isAllergen ?
+                `<span class="ingredient-allergen">${ing.name}</span>` :
+                ing.name;
+            }).join(', ');
+          }
+
+          html += `
+            <div class="menu-dish ${hasAllergens ? 'allergen-warning' : ''}">
+              <div style="flex: 1;">
+                <div class="dish-name ${hasAllergens ? 'allergen-name' : ''}">
+                  ${dish.dish_name}
+                  ${hasAllergens ? '🚫' : ''}
+                </div>
+                <div style="font-size: 14px; color: #666; margin-top: 5px;">
+                  ${dish.description || ''}
+                </div>
+                <div style="font-size: 14px; color: #666; margin-top: 5px;">
+                  🔥 ${dish.calories} ккал | 💰 ${dish.price} ₽
+                </div>
+                <div class="ingredient-list" style="margin-top: 5px;">
+                  <strong>Состав:</strong> ${ingredientsHtml}
+                </div>
+                ${hasAllergens ? `
+                  <div class="allergen-warning-box">
+                    ⚠️ <strong>Содержит ваши аллергены:</strong> ${allergenNames.join(', ')}
+                  </div>
+                ` : ''}
+              </div>
+              <span class="dish-type lunch">обед</span>
+              <span class="dish-stock ${stockClass}">${stockText}</span>
+            </div>
+          `;
+        });
+
+        // Обновляем информацию об обеде
+        document.getElementById('lunchPriceValue').textContent = lunchTotal;
+        document.getElementById('btnOrderLunch').disabled = hasOrderedLunch;
+        if (hasOrderedLunch) {
+          document.getElementById('btnOrderLunch').textContent = '✓ Уже заказано';
+          document.getElementById('btnOrderLunch').style.background = '#757575';
+        }
+      }
+
+      container.innerHTML = html;
+
+      // Показываем блок оплаты, если есть меню
+      if (menuData.breakfast.length > 0 || menuData.lunch.length > 0) {
+        document.getElementById('paymentBlock').style.display = 'block';
+      }
+    }
+
+    // Заказ приема пищи
+    function orderMeal(mealType) {
+      if (!todayMenu[mealType] || todayMenu[mealType].length === 0) {
+        alert(`Нет доступных блюд для ${mealType === 'breakfast' ? 'завтрака' : 'обеда'}`);
+        return;
+      }
+
+      // Проверяем подписку
+      const hasSubscription = userData?.has_active_subscription;
+      const price = mealType === 'breakfast' ?
+        document.getElementById('breakfastPriceValue').textContent :
+        document.getElementById('lunchPriceValue').textContent;
+
+      if (!hasSubscription) {
+        if (!confirm(`У вас нет активной подписки. ${mealType === 'breakfast' ? 'Завтрак' : 'Обед'} будет стоить ${price} ₽. Продолжить?`)) {
+          return;
+        }
+      }
+
+      // Находим menu_id для первого доступного блюда этого типа
+      const availableDishes = todayMenu[mealType].filter(dish => dish.current_stock > 0);
+      if (availableDishes.length === 0) {
+        alert('Извините, все блюда для этого приема пищи закончились');
+        return;
+      }
+
+      const menuItem = availableDishes[0];
+
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          menu_id: menuItem.id
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert(`Заказ создан! ${mealType === 'breakfast' ? 'Завтрак' : 'Обед'} успешно заказан.`);
+
+          // Обновляем UI
+          const buttonId = mealType === 'breakfast' ? 'btnOrderBreakfast' : 'btnOrderLunch';
+          const button = document.getElementById(buttonId);
+          button.disabled = true;
+          button.textContent = '✓ Уже заказано';
+          button.style.background = '#4CAF50';
+
+          // Обновляем данные
+          loadTodayMenu();
+          loadOrders();
+        } else {
+          alert('Ошибка: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка создания заказа:', error);
+        alert('Ошибка при создании заказа');
+      });
+    }
+
+    // Обновление информации о подписке
+    function updateSubscriptionInfo() {
+      const container = document.getElementById('subscriptionInfo');
+
+      if (!userData) {
+        container.innerHTML = '<p>Загрузка информации о подписке...</p>';
+        return;
+      }
+
+      if (userData.has_active_subscription) {
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="status-badge status-active">Активна</span>
+            <div>
+              <div style="font-weight: bold; color: #1b5e20;">Подписка активна</div>
+              <div style="font-size: 14px; color: #666;">Действует до: ${userData.subscription_end_date}</div>
+            </div>
+          </div>
+          <p style="margin-top: 10px; font-size: 14px;">
+            Вы можете заказывать завтраки и обеды бесплатно до окончания подписки.
+          </p>
+        `;
+        document.getElementById('btnBuySubscription').textContent = 'Продлить подписку';
+      } else {
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="status-badge status-inactive">Не активна</span>
+            <div>
+              <div style="font-weight: bold; color: #c62828;">Подписка не активна</div>
+              ${userData.subscription_end_date ?
+                `<div style="font-size: 14px; color: #666;">Истекла: ${userData.subscription_end_date}</div>` :
+                '<div style="font-size: 14px; color: #666;">Подписка не оформлена</div>'
+              }
+            </div>
+          </div>
+          <p style="margin-top: 10px; font-size: 14px;">
+            Без подписки каждый прием пищи оплачивается отдельно.
+          </p>
+        `;
+        document.getElementById('btnBuySubscription').textContent = 'Купить подписку на месяц';
+      }
+    }
+
+    // Покупка подписки
+    function buySubscription() {
+      if (confirm('Купить подписку на месяц за 1500 ₽?')) {
+        fetch('/api/payments/subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            days: 30,
+            amount: 1500
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            alert('Подписка успешно оформлена! Теперь вы можете заказывать питание бесплатно.');
+            loadUserData(); // Обновляем данные пользователя
+          } else {
+            alert('Ошибка: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка покупки подписки:', error);
+          alert('Ошибка при оформлении подписки');
+        });
+      }
+    }
+
+    // Отображение аллергенов
+    function updateAllergensDisplay() {
+      const container = document.getElementById('allergensContainer');
+      const loading = document.getElementById('allergensLoading');
+
+      if (loading) {
+        loading.style.display = 'none';
+      }
+
+      if (!userAllergens || userAllergens.length === 0) {
+        container.innerHTML = '<p style="color: #666; font-style: italic;">Аллергены не указаны</p>';
+        return;
+      }
+
+      let html = '';
+      userAllergens.forEach(allergen => {
+        html += `<span class="allergen-metka">${allergen.name}</span>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Загрузка истории заказов
+    function loadOrders() {
+      fetch('/api/orders/my', {
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        userOrders = data;
+        displayOrders(data);
+      })
+      .catch(error => {
+        console.error('Ошибка загрузки заказов:', error);
+        document.getElementById('ordersLoading').innerHTML =
+          '<div class="error">Ошибка загрузки истории заказов</div>';
+      });
+    }
+
+    // Отображение истории заказов
+    function displayOrders(orders) {
+      const container = document.getElementById('ordersContainer');
+      const loading = document.getElementById('ordersLoading');
+
+      if (loading) {
+        loading.style.display = 'none';
+      }
+
+      if (!orders || orders.length === 0) {
+        container.innerHTML = '<p style="color: #666; font-style: italic;">Заказов пока нет</p>';
+        return;
+      }
+
+      // Группируем заказы по дате
+      const ordersByDate = {};
+      orders.forEach(order => {
+        const date = order.date || order.order_date?.split('T')[0];
+        if (!ordersByDate[date]) {
+          ordersByDate[date] = [];
+        }
+        ordersByDate[date].push(order);
+      });
+
+      let html = '';
+
+      // Ограничиваем количество отображаемых дней
+      const dates = Object.keys(ordersByDate).sort().reverse().slice(0, 5);
+
+      dates.forEach(date => {
+        html += `<h3 style="color: #555; margin: 15px 0 10px;">${formatDate(date)}</h3>`;
+
+        ordersByDate[date].forEach(order => {
+          const mealType = order.meal_type === 'breakfast' ? 'Завтрак' : 'Обед';
+          const status = order.paid ? 'Оплачен' : 'Ожидает оплаты';
+          const statusColor = order.paid ? '#4CAF50' : '#FF9800';
+
+          html += `
+            <div class="istoriya-zakazov">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>${mealType}:</strong> ${order.dish_name}
+                </div>
+                <div style="font-size: 14px; color: ${statusColor};">
+                  ${status}
+                </div>
+              </div>
+              ${order.price ? `<div style="font-size: 14px; color: #666; margin-top: 5px;">Стоимость: ${order.price} ₽</div>` : ''}
+            </div>
+          `;
+        });
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Форматирование даты
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (date.toDateString() === today.toDateString()) {
+        return 'Сегодня';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'Вчера';
+      } else {
+        return date.toLocaleDateString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      }
+    }
+
+    // Показать менеджер аллергенов
+    function showAllergenManager() {
+      document.getElementById('allergenModal').style.display = 'flex';
+      loadAllergensForManagement();
+    }
+
+    // Скрыть менеджер аллергенов
+    function hideAllergenManager() {
+      document.getElementById('allergenModal').style.display = 'none';
+    }
+
+    // Загрузка аллергенов для управления
+    function loadAllergensForManagement() {
+      const container = document.getElementById('allergenCheckboxes');
+
+      if (allIngredients.length === 0) {
+        container.innerHTML = '<div class="error">Не удалось загрузить список продуктов</div>';
+        return;
+      }
+
+      // Получаем ID текущих аллергенов пользователя
+      const userAllergenIds = userAllergens.map(a => a.id);
+
+      let html = '';
+      // Берем только первые 30 ингредиентов для удобства
+      allIngredients.slice(0, 30).forEach(ingredient => {
+        const isChecked = userAllergenIds.includes(ingredient.id);
+        html += `
+          <label class="allergen-checkbox">
+            <input type="checkbox" value="${ingredient.id}" ${isChecked ? 'checked' : ''}>
+            <span>${ingredient.name} (${ingredient.unit})</span>
+          </label>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Сохранение аллергенов
+    function saveAllergens() {
+      const checkboxes = document.querySelectorAll('#allergenCheckboxes input[type="checkbox"]');
+      const selectedIds = [];
+
+      checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+          selectedIds.push(parseInt(checkbox.value));
+        }
+      });
+
+      fetch('/api/user/allergens', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          allergen_ids: selectedIds
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert('Аллергены успешно обновлены!');
+          hideAllergenManager();
+          loadUserData(); // Перезагружаем данные пользователя
+          loadTodayMenu(); // Перезагружаем меню для обновления предупреждений
+        } else {
+          alert('Ошибка: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка сохранения аллергенов:', error);
+        alert('Ошибка при сохранении аллергенов');
+      });
+    }
+
+    // Выход из системы
+    function logout() {
+      if (confirm('Вы уверены, что хотите выйти?')) {
+        fetch('/logout', {
+          credentials: 'include'
+        })
+        .then(() => {
+          window.location.href = '/login';
+        })
+        .catch(error => {
+          console.error('Ошибка выхода:', error);
+          window.location.href = '/login';
+        });
+      }
+    }
+  </script>
 </body>
 </html>

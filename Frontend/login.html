@@ -106,12 +106,17 @@
       display: none;
     }
 
-
     .spisok_allergenov {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 12px;
       margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background: #f9f9f9;
     }
 
     .flazok {
@@ -127,7 +132,7 @@
     }
 
     .flazok:hover {
-      background: #f5f9ff;
+      background: #e3f2fd;
     }
 
     .flazok input[type="checkbox"] {
@@ -135,15 +140,44 @@
       transform: scale(1.3);
       min-width: 20px;
       min-height: 20px;
+      cursor: pointer;
     }
 
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error {
+      color: #f44336;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+    }
 
     button, .knopka_formy, .ssylka_pereklyucheniya {
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       -webkit-appearance: none;
     }
-
 
     @media (max-width: 360px) {
       .spisok_allergenov {
@@ -161,14 +195,17 @@
 
     <div id="forma_vhoda">
       <div class="zagolovok_formy">Вход в систему</div>
+      <div id="loginMessage" class="message" style="display: none;"></div>
       <form id="loginForm">
         <div class="gruppa_polei">
           <label class="metka_poliya" for="login">Логин или email</label>
           <input type="text" id="login" class="pole_vvoda" autocomplete="username" required>
+          <div id="loginError" class="error"></div>
         </div>
         <div class="gruppa_polei">
           <label class="metka_poliya" for="parol">Пароль</label>
           <input type="password" id="parol" class="pole_vvoda" autocomplete="current-password" required>
+          <div id="passwordError" class="error"></div>
         </div>
         <button type="submit" class="knopka_formy">Войти</button>
       </form>
@@ -179,44 +216,39 @@
 
     <div id="forma_registracii" class="forma_skryta">
       <div class="zagolovok_formy">Регистрация</div>
+      <div id="registerMessage" class="message" style="display: none;"></div>
       <form id="regForm">
         <div class="gruppa_polei">
           <label class="metka_poliya" for="imya">Имя</label>
           <input type="text" id="imya" class="pole_vvoda" autocomplete="name" required>
+          <div id="nameError" class="error"></div>
         </div>
         <div class="gruppa_polei">
           <label class="metka_poliya" for="email">Email</label>
-          <input type="text" id="email" class="pole_vvoda" autocomplete="email" required>
+          <input type="email" id="email" class="pole_vvoda" autocomplete="email" required>
+          <div id="emailError" class="error"></div>
         </div>
         <div class="gruppa_polei">
           <label class="metka_poliya" for="novyy_parol">Пароль</label>
           <input type="password" id="novyy_parol" class="pole_vvoda" autocomplete="new-password" required>
+          <div id="passwordErrorReg" class="error"></div>
+        </div>
+        <div class="gruppa_polei">
+          <label class="metka_poliya" for="povtor_parolya">Повторите пароль</label>
+          <input type="password" id="povtor_parolya" class="pole_vvoda" autocomplete="new-password" required>
+          <div id="confirmPasswordError" class="error"></div>
         </div>
 
         <div class="gruppa_polei">
-          <div class="metka_poliya">Что нежелательно в составе?</div>
-          <div class="spisok_allergenov">
-            <label class="flazok"><input type="checkbox" name="allergen" value="арахис"> арахис</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="орехи"> орехи</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="рыба"> рыба</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="яйца"> яйца</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="молоко"> молоко</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="курица"> курица</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="глютен"> глютен</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="кинза"> кинза</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="говядина"> говядина</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="свинина"> свинина</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="мед"> мед</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="лук"> лук</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="сахар"> сахар</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="море-продукты"> море-продукты</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="чеснок"> чеснок</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="грибы"> грибы</label>
-            <label class="flazok"><input type="checkbox" name="allergen" value="мяса"> мясо</label>
+          <div class="metka_poliya">Аллергены и непереносимости (опционально)</div>
+          <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Отметьте продукты, на которые у вас аллергия:</p>
+          <div id="allergensLoading" class="loading">Загрузка списка аллергенов...</div>
+          <div id="spisok_allergenov" class="spisok_allergenov" style="display: none;">
+            <!-- Здесь будут загружены чекбоксы с аллергенами -->
           </div>
         </div>
 
-        <button type="submit" class="knopka_formy">Зарегистрироваться</button>
+        <button type="submit" class="knopka_formy" id="regButton">Зарегистрироваться</button>
       </form>
       <div class="pereklyuchatel">
         Уже есть аккаунт? <span class="ssylka_pereklyucheniya" onclick="pokazat('vhod')">Войти</span>
@@ -224,6 +256,270 @@
     </div>
   </div>
 
-  <script src="/js/login.js"></script>
+  <script>
+    // Функция переключения между формами
+    function pokazat(formType) {
+      const loginForm = document.getElementById('forma_vhoda');
+      const registerForm = document.getElementById('forma_registracii');
+
+      if (formType === 'vhod') {
+        loginForm.classList.remove('forma_skryta');
+        registerForm.classList.add('forma_skryta');
+        clearMessages();
+      } else if (formType === 'registraciya') {
+        loginForm.classList.add('forma_skryta');
+        registerForm.classList.remove('forma_skryta');
+        clearMessages();
+        loadAllergens(); // Загружаем аллергены при показе формы регистрации
+      }
+    }
+
+    // Очистка сообщений
+    function clearMessages() {
+      document.querySelectorAll('.message').forEach(msg => {
+        msg.style.display = 'none';
+        msg.textContent = '';
+        msg.className = 'message';
+      });
+      document.querySelectorAll('.error').forEach(error => {
+        error.style.display = 'none';
+        error.textContent = '';
+      });
+    }
+
+    // Показать сообщение
+    function showMessage(elementId, text, type) {
+      const element = document.getElementById(elementId);
+      element.textContent = text;
+      element.className = `message ${type}`;
+      element.style.display = 'block';
+    }
+
+    // Показать ошибку
+    function showError(elementId, text) {
+      const element = document.getElementById(elementId);
+      element.textContent = text;
+      element.style.display = 'block';
+    }
+
+    // Загрузка аллергенов из базы данных
+    function loadAllergens() {
+      const container = document.getElementById('spisok_allergenov');
+      const loading = document.getElementById('allergensLoading');
+
+      // Проверяем, не загружены ли уже аллергены
+      if (container.children.length > 0) {
+        loading.style.display = 'none';
+        container.style.display = 'grid';
+        return;
+      }
+
+      fetch('/api/ingredients')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Ошибка загрузки аллергенов');
+          }
+          return response.json();
+        })
+        .then(ingredients => {
+          loading.style.display = 'none';
+
+          if (ingredients.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #666;">Список продуктов пуст</p>';
+            container.style.display = 'block';
+            return;
+          }
+
+          let html = '';
+          // Берем только первые 20 ингредиентов для удобства
+          ingredients.slice(0, 20).forEach(ingredient => {
+            html += `
+              <label class="flazok">
+                <input type="checkbox" name="allergen" value="${ingredient.id}">
+                ${ingredient.name}
+              </label>
+            `;
+          });
+
+          container.innerHTML = html;
+          container.style.display = 'grid';
+        })
+        .catch(error => {
+          console.error('Ошибка загрузки аллергенов:', error);
+          loading.innerHTML = '<p style="color: #f44336;">Не удалось загрузить список аллергенов</p>';
+        });
+    }
+
+    // Обработка формы входа
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('login').value.trim();
+      const password = document.getElementById('parol').value;
+
+      // Валидация
+      let hasError = false;
+
+      if (!username) {
+        showError('loginError', 'Введите логин или email');
+        hasError = true;
+      } else {
+        document.getElementById('loginError').style.display = 'none';
+      }
+
+      if (!password) {
+        showError('passwordError', 'Введите пароль');
+        hasError = true;
+      } else {
+        document.getElementById('passwordError').style.display = 'none';
+      }
+
+      if (hasError) return;
+
+      // Отправка запроса
+      const button = this.querySelector('button[type="submit"]');
+      const originalText = button.textContent;
+      button.textContent = 'Вход...';
+      button.disabled = true;
+
+      fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        button.textContent = originalText;
+        button.disabled = false;
+
+        if (data.status === 'success') {
+          showMessage('loginMessage', 'Успешный вход! Перенаправление...', 'success');
+          setTimeout(() => {
+            window.location.href = data.redirect;
+          }, 1000);
+        } else {
+          showMessage('loginMessage', data.message || 'Неверный логин или пароль', 'error-message');
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка входа:', error);
+        button.textContent = originalText;
+        button.disabled = false;
+        showMessage('loginMessage', 'Ошибка соединения с сервером', 'error-message');
+      });
+    });
+
+    // Обработка формы регистрации
+    document.getElementById('regForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('imya').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('novyy_parol').value;
+      const confirmPassword = document.getElementById('povtor_parolya').value;
+
+      // Получаем выбранные аллергены
+      const allergenCheckboxes = document.querySelectorAll('#spisok_allergenov input[name="allergen"]:checked');
+      const allergens = Array.from(allergenCheckboxes).map(cb => parseInt(cb.value));
+
+      // Валидация
+      let hasError = false;
+
+      if (!name) {
+        showError('nameError', 'Введите имя');
+        hasError = true;
+      } else {
+        document.getElementById('nameError').style.display = 'none';
+      }
+
+      if (!email) {
+        showError('emailError', 'Введите email');
+        hasError = true;
+      } else if (!/\S+@\S+\.\S+/.test(email)) {
+        showError('emailError', 'Введите корректный email');
+        hasError = true;
+      } else {
+        document.getElementById('emailError').style.display = 'none';
+      }
+
+      if (!password) {
+        showError('passwordErrorReg', 'Введите пароль');
+        hasError = true;
+      } else if (password.length < 4) {
+        showError('passwordErrorReg', 'Пароль должен быть не менее 4 символов');
+        hasError = true;
+      } else {
+        document.getElementById('passwordErrorReg').style.display = 'none';
+      }
+
+      if (!confirmPassword) {
+        showError('confirmPasswordError', 'Повторите пароль');
+        hasError = true;
+      } else if (password !== confirmPassword) {
+        showError('confirmPasswordError', 'Пароли не совпадают');
+        hasError = true;
+      } else {
+        document.getElementById('confirmPasswordError').style.display = 'none';
+      }
+
+      if (hasError) return;
+
+      // Отправка запроса
+      const button = document.getElementById('regButton');
+      const originalText = button.textContent;
+      button.textContent = 'Регистрация...';
+      button.disabled = true;
+
+      fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: name,
+          email: email,
+          password: password,
+          confirm_password: confirmPassword,
+          allergens: allergens
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        button.textContent = originalText;
+        button.disabled = false;
+
+        if (data.status === 'success') {
+          showMessage('registerMessage', 'Регистрация успешна! Перенаправление...', 'success');
+          setTimeout(() => {
+            window.location.href = data.redirect;
+          }, 1500);
+        } else {
+          showMessage('registerMessage', data.message || 'Ошибка регистрации', 'error-message');
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка регистрации:', error);
+        button.textContent = originalText;
+        button.disabled = false;
+        showMessage('registerMessage', 'Ошибка соединения с сервером', 'error-message');
+      });
+    });
+
+    // Очистка ошибок при вводе
+    document.querySelectorAll('.pole_vvoda').forEach(input => {
+      input.addEventListener('input', function() {
+        const errorId = this.id + 'Error';
+        const errorElement = document.getElementById(errorId);
+        if (errorElement) {
+          errorElement.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
