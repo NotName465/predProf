@@ -97,7 +97,8 @@ def serve_js(filename): return send_from_directory(os.path.join(frontend_dir, 'j
 def serve_assets(filename): return send_from_directory(os.path.join(frontend_dir, 'assets'), filename)
 
 
-# --- AUTH API ---
+# --- API ---
+
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = flask_request.get_json()
@@ -151,7 +152,6 @@ def api_register():
     return jsonify({'status': 'success', 'redirect': '/student'}), 200
 
 
-# --- USER API ---
 @app.route('/api/user/profile', methods=['GET'])
 def get_user_profile():
     if 'user_id' not in session: return jsonify({'status': 'error'}), 401
@@ -171,43 +171,6 @@ def get_user_profile():
     return jsonify({'status': 'error'}), 404
 
 
-@app.route('/api/user/allergens', methods=['POST'])
-def update_allergens():
-    if 'user_id' not in session: return jsonify({'status': 'error'}), 401
-    data = flask_request.get_json()
-    ids = data.get('allergen_ids', [])
-    conn = get_db_connection()
-    try:
-        conn.execute('DELETE FROM allergens WHERE user_id = ?', (session['user_id'],))
-        for i_id in ids:
-            conn.execute('INSERT INTO allergens (user_id, ingredient_id) VALUES (?, ?)', (session['user_id'], i_id))
-        conn.commit()
-    except:
-        conn.close()
-        return jsonify({'status': 'error'}), 500
-    conn.close()
-    return jsonify({'status': 'success'})
-
-
-@app.route('/api/payments/subscription', methods=['POST'])
-def buy_subscription():
-    if 'user_id' not in session: return jsonify({'status': 'error'}), 401
-    conn = get_db_connection()
-    try:
-        conn.execute(
-            'INSERT INTO payments (user_id, amount, type, status) VALUES (?, 1500, "subscription", "completed")',
-            (session['user_id'],))
-        new_end_date = (date.today() + timedelta(days=30)).isoformat()
-        conn.execute('UPDATE users SET subscription_end_date = ? WHERE id = ?', (new_end_date, session['user_id']))
-        conn.commit()
-    except:
-        conn.close()
-        return jsonify({'status': 'error'}), 500
-    conn.close()
-    return jsonify({'status': 'success'})
-
-
-# --- MENU & ORDERS API ---
 @app.route('/api/menu/today', methods=['GET'])
 def get_today_menu():
     if 'user_id' not in session: return jsonify({'status': 'error'}), 401
@@ -278,17 +241,59 @@ def get_my_orders():
     return jsonify([dict(o) for o in orders])
 
 
-# --- COOK API ---
+@app.route('/api/payments/subscription', methods=['POST'])
+def buy_subscription():
+    if 'user_id' not in session: return jsonify({'status': 'error'}), 401
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            'INSERT INTO payments (user_id, amount, type, status) VALUES (?, 1500, "subscription", "completed")',
+            (session['user_id'],))
+        new_end_date = (date.today() + timedelta(days=30)).isoformat()
+        conn.execute('UPDATE users SET subscription_end_date = ? WHERE id = ?', (new_end_date, session['user_id']))
+        conn.commit()
+    except:
+        conn.close()
+        return jsonify({'status': 'error'}), 500
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+@app.route('/api/user/allergens', methods=['POST'])
+def update_allergens():
+    if 'user_id' not in session: return jsonify({'status': 'error'}), 401
+    data = flask_request.get_json()
+    ids = data.get('allergen_ids', [])
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM allergens WHERE user_id = ?', (session['user_id'],))
+        for i_id in ids:
+            conn.execute('INSERT INTO allergens (user_id, ingredient_id) VALUES (?, ?)', (session['user_id'], i_id))
+        conn.commit()
+    except:
+        conn.close()
+        return jsonify({'status': 'error'}), 500
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+# --- COOK API (ОБНОВЛЕНО) ---
+
 @app.route('/api/dishes', methods=['GET'])
 def get_dishes():
     conn = get_db_connection()
     dishes = conn.execute('SELECT * FROM dishes').fetchall()
-    conn.close()
     result = []
     for d in dishes:
         dish = dict(d)
         dish['stock_quantity'] = dish['current_stock']
+        # Считаем зарезервированные
+        res = conn.execute(
+            "SELECT COUNT(o.id) as c FROM orders o JOIN menu m ON o.menu_id=m.id WHERE m.dish_id=? AND o.collected=0 AND date(o.order_date)=date('now', 'localtime')",
+            (dish['id'],)).fetchone()
+        dish['reserved'] = res['c']
         result.append(dish)
+    conn.close()
     return jsonify(result)
 
 
@@ -300,42 +305,61 @@ def get_ingredients():
     return jsonify([dict(i) for i in ings])
 
 
-@app.route('/api/issue_meal', methods=['POST'])
-def issue_meal():
+# НОВЫЙ API ДЛЯ ПОИСКА ЗАКАЗОВ УЧЕНИКА
+@app.route('/api/cook/check_orders', methods=['POST'])
+def check_student_orders():
     if session.get('role') not in ['cook', 'admin']: return jsonify({'status': 'error'}), 403
+
     data = flask_request.get_json()
-    dish_id = data.get('dish_id')
-    student_ident = str(data.get('student_identifier')).strip()
+    ident = str(data.get('student_identifier')).strip()
+
     conn = get_db_connection()
-    dish = conn.execute('SELECT * FROM dishes WHERE id = ?', (dish_id,)).fetchone()
-    if not dish or dish['current_stock'] <= 0:
-        conn.close()
-        return jsonify({'status': 'error', 'message': 'Нет в наличии'}), 400
+    # Ищем студента
     student = conn.execute('SELECT id, username FROM users WHERE id = ? OR email = ? OR username = ?',
-                           (student_ident, student_ident, student_ident)).fetchone()
+                           (ident, ident, ident)).fetchone()
+
     if not student:
         conn.close()
         return jsonify({'status': 'error', 'message': 'Ученик не найден'}), 404
+
+    # Ищем его невыданные заказы на СЕГОДНЯ
+    orders = conn.execute('''
+        SELECT o.id, d.name as dish_name, d.image_url, d.calories, m.meal_type
+        FROM orders o 
+        JOIN menu m ON o.menu_id = m.id
+        JOIN dishes d ON m.dish_id = d.id
+        WHERE o.user_id = ? 
+          AND o.collected = 0
+          AND date(o.order_date) = date('now', 'localtime')
+    ''', (student['id'],)).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        'status': 'success',
+        'student_name': student['username'],
+        'orders': [dict(o) for o in orders]
+    })
+
+
+# НОВЫЙ API ДЛЯ ВЫДАЧИ ЗАКАЗА
+@app.route('/api/cook/finish_order', methods=['POST'])
+def finish_order():
+    if session.get('role') not in ['cook', 'admin']: return jsonify({'status': 'error'}), 403
+
+    data = flask_request.get_json()
+    order_id = data.get('order_id')
+
+    conn = get_db_connection()
     try:
-        conn.execute('UPDATE dishes SET current_stock = current_stock - 1 WHERE id = ?', (dish_id,))
-        today = date.today().isoformat()
-        menu = conn.execute('SELECT id FROM menu WHERE date = ? AND dish_id = ?', (today, dish_id)).fetchone()
-        if menu:
-            menu_id = menu['id']
-        else:
-            cur = conn.execute("INSERT INTO menu (date, meal_type, dish_id) VALUES (?, 'lunch', ?)", (today, dish_id))
-            menu_id = cur.lastrowid
-        conn.execute(
-            'INSERT INTO orders (user_id, menu_id, order_date, paid, collected) VALUES (?, ?, datetime("now", "localtime"), 1, 1)',
-            (student['id'], menu_id))
+        conn.execute('UPDATE orders SET collected = 1 WHERE id = ?', (order_id,))
         conn.commit()
-        new_stock = dish['current_stock'] - 1
-    except:
+    except Exception as e:
         conn.close()
         return jsonify({'status': 'error', 'message': 'Ошибка БД'}), 500
+
     conn.close()
-    return jsonify(
-        {'status': 'success', 'message': f'Выдано: {dish["name"]} для {student["username"]}', 'new_stock': new_stock})
+    return jsonify({'status': 'success', 'message': 'Блюдо выдано!'})
 
 
 @app.route('/api/add_dish', methods=['POST'])
@@ -358,18 +382,38 @@ def add_dish():
     return jsonify({'status': 'success'})
 
 
+@app.route('/api/inventory/update', methods=['POST'])
+def update_inventory():
+    if session.get('role') not in ['cook', 'admin']: return jsonify({'status': 'error'}), 403
+    data = flask_request.get_json()
+    item_id = data.get('id')
+    item_type = data.get('type')
+    qty = data.get('quantity')
+    min_qty = data.get('min_quantity')
+    conn = get_db_connection()
+    try:
+        if item_type == 'dish':
+            conn.execute('UPDATE dishes SET current_stock = ? WHERE id = ?', (qty, item_id))
+        elif item_type == 'ingredient':
+            if min_qty is not None:
+                conn.execute('UPDATE ingredients SET current_quantity = ?, min_quantity = ? WHERE id = ?',
+                             (qty, min_qty, item_id))
+            else:
+                conn.execute('UPDATE ingredients SET current_quantity = ? WHERE id = ?', (qty, item_id))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
 @app.route('/api/purchase_requests', methods=['GET'])
 def get_purchase_requests():
     if session.get('role') not in ['cook', 'admin']: return jsonify({'status': 'error'}), 403
     conn = get_db_connection()
-    requests = conn.execute('''
-        SELECT pr.id, i.name as ingredient_name, pr.quantity, i.unit, pr.status, pr.request_date, u.username as requester
-        FROM purchase_requests pr
-        JOIN ingredients i ON pr.ingredient_id = i.id
-        JOIN users u ON pr.requested_by = u.id
-        ORDER BY pr.request_date DESC
-        LIMIT 50
-    ''').fetchall()
+    requests = conn.execute(
+        'SELECT pr.id, i.name as ingredient_name, pr.quantity, i.unit, pr.status, pr.request_date, u.username as requester FROM purchase_requests pr JOIN ingredients i ON pr.ingredient_id = i.id JOIN users u ON pr.requested_by = u.id ORDER BY pr.request_date DESC LIMIT 50').fetchall()
     conn.close()
     return jsonify([dict(r) for r in requests]), 200
 
@@ -421,33 +465,19 @@ def add_review():
     return jsonify({'status': 'success', 'message': 'Отзыв добавлен'}), 200
 
 
-# ========================
-# ADMIN API (НОВОЕ)
-# ========================
-
+# --- ADMIN API ---
 @app.route('/api/admin/stats', methods=['GET'])
 def get_admin_stats():
     if session.get('role') != 'admin': return jsonify({'status': 'error'}), 403
     conn = get_db_connection()
-
-    # Посещаемость (всего заказов за сегодня)
     attendance = \
     conn.execute("SELECT COUNT(*) as c FROM orders WHERE date(order_date)=date('now', 'localtime')").fetchone()['c']
-
-    # Выручка за сегодня (из таблицы payments)
     revenue_today = conn.execute(
         "SELECT SUM(amount) as s FROM payments WHERE status='completed' AND date(payment_date)=date('now', 'localtime')").fetchone()[
                         's'] or 0
-
-    # Всего выдано порций за все время (исторические данные)
     total_issued = conn.execute("SELECT COUNT(*) as c FROM orders WHERE collected=1").fetchone()['c']
-
     conn.close()
-    return jsonify({
-        'attendance_today': attendance,
-        'revenue_today': revenue_today,
-        'total_issued': total_issued
-    }), 200
+    return jsonify({'attendance_today': attendance, 'revenue_today': revenue_today, 'total_issued': total_issued}), 200
 
 
 @app.route('/api/purchase_requests/<int:req_id>', methods=['PUT'])
@@ -455,32 +485,21 @@ def update_purchase_request(req_id):
     if session.get('role') != 'admin': return jsonify({'status': 'error'}), 403
     data = flask_request.get_json()
     status = data.get('status')
-
-    if status not in ['approved', 'rejected']: return jsonify({'status': 'error'}), 400
-
     conn = get_db_connection()
     try:
-        # Обновляем статус заявки
-        conn.execute('''
-            UPDATE purchase_requests 
-            SET status = ?, approved_by = ?, approved_date = datetime('now', 'localtime') 
-            WHERE id = ?
-        ''', (status, session['user_id'], req_id))
-
-        # Если одобрено - увеличиваем кол-во ингредиентов на складе
+        conn.execute(
+            'UPDATE purchase_requests SET status = ?, approved_by = ?, approved_date = datetime("now", "localtime") WHERE id = ?',
+            (status, session['user_id'], req_id))
         if status == 'approved':
             req = conn.execute('SELECT ingredient_id, quantity FROM purchase_requests WHERE id = ?',
                                (req_id,)).fetchone()
             if req:
                 conn.execute('UPDATE ingredients SET current_quantity = current_quantity + ? WHERE id = ?',
                              (req['quantity'], req['ingredient_id']))
-
         conn.commit()
     except Exception as e:
         conn.close()
-        print(f"Error updating request: {e}")
         return jsonify({'status': 'error'}), 500
-
     conn.close()
     return jsonify({'status': 'success'}), 200
 
@@ -489,19 +508,56 @@ def update_purchase_request(req_id):
 def get_reports():
     if session.get('role') != 'admin': return jsonify({'status': 'error'}), 403
     conn = get_db_connection()
-
-    # Отчет: продажи по дням (последние 7 дней)
-    reports = conn.execute('''
-        SELECT date(payment_date) as date, SUM(amount) as revenue, COUNT(*) as transactions
-        FROM payments
-        WHERE status='completed'
-        GROUP BY date(payment_date)
-        ORDER BY date DESC
-        LIMIT 7
-    ''').fetchall()
-
+    reports = conn.execute(
+        "SELECT date(payment_date) as date, SUM(amount) as revenue, COUNT(*) as transactions FROM payments WHERE status='completed' GROUP BY date(payment_date) ORDER BY date DESC LIMIT 7").fetchall()
     conn.close()
     return jsonify([dict(r) for r in reports]), 200
+
+
+@app.route('/api/admin/users', methods=['GET'])
+def get_users():
+    if session.get('role') != 'admin': return jsonify({'status': 'error'}), 403
+    conn = get_db_connection()
+    users = conn.execute(
+        'SELECT u.id, u.username, u.email, u.role, u.subscription_end_date, u.created_at, (SELECT COUNT(*) FROM orders WHERE user_id = u.id) as total_orders FROM users u').fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in users]), 200
+
+
+@app.route('/api/admin/users/<int:user_id>', methods=['PUT'])
+def update_user_role(user_id):
+    if session.get('role') != 'admin': return jsonify({'status': 'error'}), 403
+    data = flask_request.get_json()
+    conn = get_db_connection()
+    try:
+        conn.execute('UPDATE users SET role = ? WHERE id = ?', (data.get('role'), user_id))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    conn.close()
+    return jsonify({'status': 'success'}), 200
+
+
+@app.route('/api/admin/active-subscriptions', methods=['GET'])
+def get_active_subs():
+    if session.get('role') != 'admin': return jsonify({'status': 'error'}), 403
+    conn = get_db_connection()
+    count = conn.execute("SELECT COUNT(*) as c FROM users WHERE subscription_end_date >= date('now')").fetchone()['c']
+    conn.close()
+    return jsonify({'count': count}), 200
+
+
+@app.route('/api/admin/popular-dishes', methods=['GET'])
+def get_popular_admin():
+    if session.get('role') != 'admin': return jsonify({'status': 'error'}), 403
+    conn = get_db_connection()
+    top = conn.execute(
+        "SELECT d.name, COUNT(o.id) as count FROM orders o JOIN menu m ON o.menu_id=m.id JOIN dishes d ON m.dish_id=d.id WHERE date(o.order_date)=date('now', 'localtime') GROUP BY d.name ORDER BY count DESC LIMIT 5").fetchall()
+    total = sum([r['count'] for r in top]) or 1
+    result = [{'name': r['name'], 'count': r['count'], 'percentage': int((r['count'] / total) * 100)} for r in top]
+    conn.close()
+    return jsonify(result), 200
 
 
 if __name__ == '__main__':

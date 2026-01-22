@@ -5,228 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ученик - Столовая Школа 2098</title>
   <style>
-    /* === ОСНОВНЫЕ СТИЛИ (ВОССТАНОВЛЕНЫ) === */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Candara, sans-serif;
-    }
+    /* === СТИЛИ === */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Candara, sans-serif; }
+    body { background: linear-gradient(135deg, #e3f2fd, #ffffff); color: #333; min-height: 100vh; padding-top: 70px; }
 
-    body {
-      background: linear-gradient(135deg, #e3f2fd, #ffffff);
-      color: #333;
-      min-height: 100vh;
-      padding-top: 70px;
-    }
+    .shapka { background: white; padding: 12px 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; width: 100%; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    .prof { background: #2196F3; color: white; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .zagolovok_shapki { color: #0d47a1; font-size: 18px; font-weight: bold; text-align: center; flex-grow: 1; margin: 0 10px; }
 
-    .shapka {
-      background: white;
-      padding: 12px 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    .osnovnoe { max-width: 800px; margin: 0 auto; padding: 0 20px 30px; }
+    .karta { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 24px; }
+    .zagolovok_karty { color: #0d47a1; font-size: 20px; margin-bottom: 20px; font-weight: bold; }
 
-    .prof {
-      background: #2196F3;
-      color: white;
-      border: none;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    /* Блюда меню */
+    .menu-dish { padding: 15px; border-radius: 12px; background: #f5f9ff; margin: 10px 0; display: flex; justify-content: space-between; align-items: flex-start; transition: all 0.2s; border: 1px solid transparent; }
+    .menu-dish:hover { transform: translateY(-2px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
-    .zagolovok_shapki {
-      color: #0d47a1;
-      font-size: 18px;
-      font-weight: bold;
-      text-align: center;
-      flex-grow: 1;
-      margin: 0 10px;
-    }
-
-    .osnovnoe {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 20px 30px;
-    }
-
-    .karta {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .zagolovok_karty {
-      color: #0d47a1;
-      font-size: 20px;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-
-    /* Стили блюд в меню */
-    .menu-dish {
-      padding: 12px;
-      border-radius: 12px;
-      background: #f5f9ff;
-      margin: 10px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.2s;
-    }
-
-    .menu-dish:hover {
-      background: #e3f2fd;
-      transform: translateY(-2px);
-    }
-
-    .dish-name {
-      font-weight: 600;
-      color: #0d47a1;
-      flex: 1;
-    }
-
-    .dish-details {
-        font-size: 13px;
-        color: #666;
-        margin-top: 4px;
-    }
+    .dish-info { flex: 1; margin-right: 15px; }
+    .dish-name { font-weight: 600; color: #0d47a1; font-size: 16px; margin-bottom: 5px; }
+    .dish-meta { font-size: 14px; color: #444; font-weight: bold; margin-bottom: 5px; }
+    .dish-ingredients { font-size: 13px; color: #666; font-style: italic; line-height: 1.4; }
 
     /* Кнопки */
-    .knopka {
-      background: #2196F3;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.2s;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .knopka:hover {
-      background: #1976D2;
-    }
-
-    .knopka-small {
-        padding: 6px 12px;
-        font-size: 13px;
-        width: auto;
-        margin-top: 0;
-        min-height: auto;
-    }
-
-    .knopka-success { background: #4CAF50; }
-    .knopka-success:hover { background: #388E3C; }
-
+    .knopka { background: #2196F3; color: white; border: none; padding: 12px 24px; border-radius: 50px; font-size: 16px; cursor: pointer; transition: background 0.2s; width: 100%; margin-top: 10px; }
+    .knopka:hover { background: #1976D2; }
+    .knopka-small { padding: 8px 16px; font-size: 14px; width: auto; margin-top: 0; align-self: center; }
     .knopka-abonement { background: #FF9800; }
-    .knopka-abonement:hover { background: #F57C00; }
-
     .knopka-purple { background: #9C27B0; }
-    .knopka-purple:hover { background: #7B1FA2; }
+    .knopka-success { background: #4CAF50; }
 
-    /* История заказов */
-    .istoriya-zakazov {
-      font-size: 16px;
-      color: #555;
-      margin: 10px 0;
-      padding: 15px;
-      border-radius: 12px;
-      background: #f9f9f9;
-      border: 1px solid #eee;
-    }
+    /* История */
+    .istoriya-zakazov { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
+    .allergen-metka { background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 20px; font-size: 13px; margin-right: 5px; display: inline-block; margin-bottom: 5px; }
 
-    /* Аллергены */
-    .allergen-metka {
-      background: #ffebee;
-      color: #c62828;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 13px;
-      margin-right: 5px;
-      display: inline-block;
-      margin-bottom: 5px;
-    }
+    /* Модалки */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
-    /* Модальное окно */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .modal-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-
-    /* Рейтинг (Звезды) */
-    .rating {
-        display: flex;
-        flex-direction: row-reverse;
-        justify-content: center;
-        gap: 5px;
-        margin: 15px 0;
-    }
+    .rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 5px; margin: 15px 0; }
     .rating input { display: none; }
-    .rating label {
-        font-size: 30px;
-        color: #ccc;
-        cursor: pointer;
-        transition: color 0.2s;
-    }
-    .rating input:checked ~ label,
-    .rating label:hover,
-    .rating label:hover ~ label {
-        color: #FFD700;
-    }
+    .rating label { font-size: 30px; color: #ccc; cursor: pointer; }
+    .rating input:checked ~ label, .rating label:hover, .rating label:hover ~ label { color: #FFD700; }
 
     .loading { text-align: center; color: #777; padding: 20px; }
-
-    @media (max-width: 600px) {
-      .zagolovok_karty { font-size: 18px; }
-      .knopka { font-size: 15px; }
-    }
   </style>
 </head>
 <body>
-
 
   <div class="shapka">
     <button class="prof" onclick="logout()"></button>
@@ -238,58 +63,38 @@
 
     <!-- 1. МЕНЮ -->
     <div class="karta">
-      <h2 class="zagolovok_karty"> Меню на сегодня</h2>
+      <h2 class="zagolovok_karty">Меню на сегодня</h2>
       <div id="menuLoading" class="loading">Загрузка меню...</div>
       <div id="menuContainer"></div>
     </div>
 
     <!-- 2. ПОДПИСКА -->
     <div class="karta">
-      <h2 class="zagolovok_karty"> Моя подписка</h2>
-      <div id="subscriptionInfo" style="margin-bottom: 15px; font-size: 16px;">
-        Загрузка...
-      </div>
-      <button class="knopka knopka-abonement" onclick="buySubscription()">
-        Оформить подписку (1500 ₽ / мес)
-      </button>
-      <p style="font-size: 13px; color: #666; margin-top: 10px;">
-        Подписка позволяет заказывать завтраки и обеды бесплатно.
-      </p>
+      <h2 class="zagolovok_karty">Моя подписка</h2>
+      <div id="subscriptionInfo" style="margin-bottom: 15px; font-size: 16px;">Загрузка...</div>
+      <button class="knopka knopka-abonement" onclick="buySubscription()">Оформить подписку (1500 ₽ / мес)</button>
     </div>
 
     <!-- 3. АЛЛЕРГЕНЫ -->
     <div class="karta">
-      <h2 class="zagolovok_karty"> Мои аллергены</h2>
-      <div id="allergensContainer" style="margin-bottom: 15px;">
-        <span style="color: #999;">Нет отметок</span>
-      </div>
-      <button class="knopka knopka-purple" onclick="showAllergenManager()">
-        Настроить предпочтения
-      </button>
+      <h2 class="zagolovok_karty">Мои аллергены</h2>
+      <div id="allergensContainer" style="margin-bottom: 15px;"><span style="color:#999;">Нет отметок</span></div>
+      <button class="knopka knopka-purple" onclick="showAllergenManager()">Настроить предпочтения</button>
     </div>
 
-    <!-- 4. ИСТОРИЯ ЗАКАЗОВ -->
+    <!-- 4. ИСТОРИЯ -->
     <div class="karta">
       <h2 class="zagolovok_karty">История заказов</h2>
-      <div id="ordersContainer">
-        <div class="loading">Загрузка истории...</div>
-      </div>
+      <div id="ordersContainer"><div class="loading">Загрузка...</div></div>
     </div>
 
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: АЛЛЕРГЕНЫ -->
+  <!-- МОДАЛКИ -->
   <div id="allergenModal" class="modal">
     <div class="modal-content">
-      <h3>Выберите аллергены</h3>
-      <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
-        Отметьте продукты, которые вам нельзя есть:
-      </p>
-
-      <div id="allergenCheckboxes" style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 8px;">
-        <!-- JS заполнит это -->
-      </div>
-
+      <h3>Выберите нежелательные продукты</h3>
+      <div id="allergenCheckboxes" style="margin: 15px 0; max-height: 300px; overflow-y: auto;"></div>
       <div class="modal-buttons">
         <button class="knopka knopka-success knopka-small" onclick="saveAllergens()">Сохранить</button>
         <button class="knopka knopka-small" onclick="document.getElementById('allergenModal').style.display='none'" style="background: #757575;">Отмена</button>
@@ -297,13 +102,11 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ОТЗЫВ -->
   <div id="reviewModal" class="modal">
     <div class="modal-content">
       <h3>Оставить отзыв</h3>
-      <p id="reviewDishName" style="color: #0d47a1; font-weight: bold; margin-bottom: 10px;"></p>
+      <p id="reviewDishName"></p>
       <input type="hidden" id="reviewDishId">
-
       <div class="rating">
         <input type="radio" name="rating" value="5" id="r5"><label for="r5">★</label>
         <input type="radio" name="rating" value="4" id="r4"><label for="r4">★</label>
@@ -311,9 +114,7 @@
         <input type="radio" name="rating" value="2" id="r2"><label for="r2">★</label>
         <input type="radio" name="rating" value="1" id="r1"><label for="r1">★</label>
       </div>
-
-      <textarea id="reviewComment" placeholder="Напишите ваш комментарий..." style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px;"></textarea>
-
+      <textarea id="reviewComment" placeholder="Комментарий..." style="width: 100%; height: 80px; padding: 10px; margin-top: 10px;"></textarea>
       <div class="modal-buttons">
         <button class="knopka knopka-success knopka-small" onclick="submitReview()">Отправить</button>
         <button class="knopka knopka-small" onclick="document.getElementById('reviewModal').style.display='none'" style="background: #757575;">Отмена</button>
@@ -326,11 +127,13 @@
     let userAllergens = [];
     let allIngredients = [];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadProfile();
-      loadMenu();
-      loadOrders();
-      loadIngredients();
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Сначала грузим профиль, чтобы знать аллергены
+        await loadProfile();
+        // Потом грузим меню, чтобы сразу подсветить опасное
+        loadMenu();
+        loadOrders();
+        loadIngredients();
     });
 
     // --- ПРОФИЛЬ ---
@@ -340,7 +143,7 @@
         if(res.ok) {
             const data = await res.json();
             userData = data.user;
-            userAllergens = data.allergens;
+            userAllergens = data.allergens; // [{id: 1, name: 'Milk'}, ...]
 
             document.getElementById('username').textContent = userData.username;
             updateSubInfo();
@@ -360,11 +163,11 @@
 
     function renderAllergens() {
         const div = document.getElementById('allergensContainer');
-        if(!userAllergens.length) div.innerHTML = '<span style="color:#999; font-style: italic;">Нет отметок</span>';
+        if(!userAllergens.length) div.innerHTML = '<span style="color:#999;">Нет отметок</span>';
         else div.innerHTML = userAllergens.map(a => `<span class="allergen-metka">${a.name}</span>`).join('');
     }
 
-    // --- МЕНЮ ---
+    // --- МЕНЮ С ПОДСВЕТКОЙ КАЛОРИЙ И АЛЛЕРГЕНОВ ---
     async function loadMenu() {
         const container = document.getElementById('menuContainer');
         try {
@@ -377,19 +180,59 @@
                 return;
             }
 
+            // Массив ID аллергенов пользователя для быстрой проверки
+            const badIngIds = userAllergens.map(a => a.id);
+
             let html = '';
-            // Функция рендера секции
+
             const renderSection = (title, items) => {
                 if(!items.length) return '';
                 let sectionHtml = `<h3 style="color: #0d47a1; margin: 20px 0 10px;">${title}</h3>`;
+
                 items.forEach(dish => {
+                    // Проверка на аллергены
+                    let isDangerous = false;
+                    let ingredientsHtml = 'Состав не указан';
+
+                    if (dish.ingredients && dish.ingredients.length > 0) {
+                        ingredientsHtml = dish.ingredients.map(ing => {
+                            // Если ингредиент в "черном списке"
+                            if (badIngIds.includes(ing.id)) {
+                                isDangerous = true;
+                                // Подсвечиваем сам ингредиент красным
+                                return `<span style="color: #d32f2f; font-weight: bold; text-decoration: underline;">${ing.name}</span>`;
+                            }
+                            return ing.name;
+                        }).join(', ');
+                    }
+
+                    // Стили для карточки
+                    // Если опасно - красная рамка и фон. Если нет - стандарт.
+                    const cardStyle = isDangerous
+                        ? 'border: 2px solid #ef5350; background: #ffebee;'
+                        : '';
+
+                    const warningIcon = isDangerous ? '! ' : '';
+                    const warningText = isDangerous ? '<div style="color:#d32f2f; font-weight:bold; font-size:12px; margin-top:5px;">Содержит нежелательные продукты!</div>' : '';
+
                     sectionHtml += `
-                    <div class="menu-dish">
-                        <div style="flex: 1;">
-                            <div class="dish-name">${dish.dish_name}</div>
-                            <div class="dish-details">${dish.calories} ккал | ${dish.price} ₽</div>
+                    <div class="menu-dish" style="${cardStyle}">
+                        <div class="dish-info">
+                            <div class="dish-name">${warningIcon}${dish.dish_name}</div>
+
+                            <div class="dish-meta">
+                                 ${dish.calories} ккал &nbsp;|&nbsp;  ${dish.price} ₽
+                            </div>
+
+                            <div class="dish-ingredients">
+                                Состав: ${ingredientsHtml}
+                            </div>
+                            ${warningText}
                         </div>
-                        <button class="knopka knopka-small" onclick="orderMeal(${dish.id})">Заказать</button>
+
+                        <button class="knopka knopka-small" onclick="orderMeal(${dish.id})">
+                            Заказать
+                        </button>
                     </div>`;
                 });
                 return sectionHtml;
@@ -401,6 +244,7 @@
             container.innerHTML = html;
             document.getElementById('menuLoading').style.display = 'none';
         } catch(e) {
+            console.error(e);
             container.innerHTML = 'Ошибка загрузки меню';
         }
     }
@@ -416,41 +260,35 @@
         if(res.ok) loadOrders();
     }
 
-    // --- ЗАКАЗЫ ---
+    // --- ИСТОРИЯ ---
     async function loadOrders() {
         const container = document.getElementById('ordersContainer');
         const res = await fetch('/api/orders/my');
         const orders = await res.json();
 
-        if(!orders.length) { container.innerHTML = '<p style="text-align:center; color:#999;">Список заказов пуст</p>'; return; }
+        if(!orders.length) { container.innerHTML = '<p style="text-align:center">Нет заказов</p>'; return; }
 
         container.innerHTML = orders.map(o => {
-            // Статус оплаты
-            let payStatus = o.paid ?
-                '<span style="color: #4CAF50; font-weight:bold;">Оплачено</span>' :
-                `<button class="knopka knopka-small" style="background:#FF9800;" onclick="alert('Переход к оплате...')">Оплатить ${o.price}₽</button>`;
+            let payBtn = o.paid ?
+                '<span style="color:green; font-weight:bold">Оплачено</span>' :
+                `<button class="knopka knopka-small" style="background:#FF9800" onclick="alert('Оплата...')">Оплатить ${o.price}₽</button>`;
 
-            // Статус получения
-            let collectStatus = o.collected ?
-                `<span style="color: #4CAF50;">Получено</span>
-                 <button style="border:none; background:none; color:#2196F3; cursor:pointer; text-decoration:underline; margin-left:10px;"
-                 onclick="openReview(${o.dish_id || 0}, '${o.dish_name}')">Оставить отзыв</button>` :
-                '<span style="color: #FF9800;">Ожидает получения</span>';
+            let status = o.collected ?
+                `<span style="color:green">Получено</span> <button style="border:none; bg:none; cursor:pointer; color:blue" onclick="openReview(${o.dish_id}, '${o.dish_name}')">Отзыв</button>` :
+                '<span style="color:orange">Ожидает получения</span>';
 
             return `
             <div class="istoriya-zakazov">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <strong style="color:#0d47a1;">${o.dish_name}</strong>
-                    <span style="color:#777; font-size:14px;">${o.date.split(' ')[0]}</span>
+                <div style="display:flex; justify-content:space-between">
+                    <strong>${o.dish_name}</strong>
+                    <span style="color:#777">${o.date.split(' ')[0]}</span>
                 </div>
-                <div style="font-size:14px;">
-                    ${payStatus} &nbsp;|&nbsp; ${collectStatus}
-                </div>
+                <div style="margin-top:5px; font-size:14px">${payBtn} | ${status}</div>
             </div>`;
         }).join('');
     }
 
-    // --- ОТЗЫВЫ ---
+    // --- ОТЗЫВЫ, АЛЛЕРГЕНЫ, ПОКУПКА ---
     function openReview(id, name) {
         document.getElementById('reviewModal').style.display = 'flex';
         document.getElementById('reviewDishName').textContent = name;
@@ -461,19 +299,12 @@
         const id = document.getElementById('reviewDishId').value;
         const rating = document.querySelector('input[name="rating"]:checked')?.value;
         const text = document.getElementById('reviewComment').value;
-
-        if(!rating) { alert('Поставьте оценку звездами!'); return; }
-
-        const res = await fetch('/api/reviews', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({dish_id: id, rating: rating, comment: text})
-        });
-        const data = await res.json();
-        alert(data.message);
+        if(!rating) { alert('Поставьте оценку!'); return; }
+        await fetch('/api/reviews', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({dish_id: id, rating, comment: text}) });
+        alert('Спасибо!');
         document.getElementById('reviewModal').style.display = 'none';
     }
 
-    // --- УПРАВЛЕНИЕ АЛЛЕРГЕНАМИ ---
     async function loadIngredients() {
         const res = await fetch('/api/ingredients');
         allIngredients = await res.json();
@@ -483,42 +314,26 @@
         document.getElementById('allergenModal').style.display = 'flex';
         const container = document.getElementById('allergenCheckboxes');
         const userIds = userAllergens.map(a => a.id);
-
         container.innerHTML = allIngredients.map(i => `
-            <label style="display:flex; align-items:center; padding:8px; border-bottom:1px solid #f0f0f0;">
-                <input type="checkbox" value="${i.id}" ${userIds.includes(i.id) ? 'checked' : ''} style="margin-right:10px;">
-                ${i.name}
-            </label>
-        `).join('');
+            <label style="display:flex; align-items:center; padding:8px; border-bottom:1px solid #eee;">
+                <input type="checkbox" value="${i.id}" ${userIds.includes(i.id)?'checked':''} style="margin-right:10px;"> ${i.name}
+            </label>`).join('');
     }
 
     async function saveAllergens() {
-        const boxes = document.querySelectorAll('#allergenCheckboxes input:checked');
-        const ids = Array.from(boxes).map(c => c.value);
-
-        await fetch('/api/user/allergens', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({allergen_ids: ids})
-        });
-        alert('Сохранено');
+        const ids = Array.from(document.querySelectorAll('#allergenCheckboxes input:checked')).map(c => c.value);
+        await fetch('/api/user/allergens', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({allergen_ids: ids}) });
         document.getElementById('allergenModal').style.display = 'none';
-        loadProfile();
+        loadProfile().then(loadMenu); // Перезагружаем меню чтобы обновить подсветку
     }
 
-    // --- ПОКУПКА ---
     async function buySubscription() {
-        if(!confirm('Списать 1500 рублей?')) return;
-        const res = await fetch('/api/payments/subscription', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({})
-        });
-        if(res.ok) { alert('Подписка оформлена!'); loadProfile(); }
-        else alert('Ошибка');
+        if(!confirm('Купить подписку?')) return;
+        const res = await fetch('/api/payments/subscription', { method:'POST' });
+        if(res.ok) { alert('Готово!'); loadProfile(); }
     }
 
-    function logout() {
-        fetch('/logout').then(() => window.location.href = '/login');
-    }
+    function logout() { fetch('/logout').then(() => window.location.href='/login'); }
   </script>
 </body>
 </html>

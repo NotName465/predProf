@@ -5,57 +5,163 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Повар — Столовая Школа 2098</title>
     <style>
+        /* === БАЗОВЫЕ СТИЛИ === */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Candara, sans-serif; }
         body { background: linear-gradient(135deg, #e3f2fd, #ffffff); color: #333; min-height: 100vh; padding-top: 70px; }
 
-        /* Шапка */
-        .shapka { background: white; padding: 15px 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; width: 100%; z-index: 100; display: flex; justify-content: center; align-items: center; }
+        .shapka {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         .title { color: #0d47a1; font-size: 20px; font-weight: bold; text-align: center; }
 
-        /* Основной макет */
-        .main-layout { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 15px 30px; }
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px 30px;
+        }
 
-        /* Левая панель */
-        .left-panel { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; min-width: 250px; }
-        .prof { background: #2196F3; color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3); transition: transform 0.2s; }
+        .left-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 250px;
+        }
+        .prof {
+            background: #2196F3;
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+            transition: transform 0.2s;
+        }
         .prof:hover { transform: scale(1.05); }
-        .head { margin-bottom: 20px; padding: 10px; background: #e3f2fd; color: #0d47a1; border-radius: 10px; text-align: center; width: 100%; }
+        .head {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #e3f2fd;
+            color: #0d47a1;
+            border-radius: 10px;
+            text-align: center;
+            width: 100%;
+        }
         .head h1 { font-size: 18px; margin: 0; font-weight: bold; }
 
-        /* Табы */
         .tabs { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-        .tab-btn { padding: 12px; border: none; background: #f5f9ff; border-radius: 12px; cursor: pointer; text-align: left; font-weight: bold; color: #555; transition: all 0.2s; }
+        .tab-btn {
+            padding: 12px;
+            border: none;
+            background: #f5f9ff;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: left;
+            font-weight: bold;
+            color: #555;
+            transition: all 0.2s;
+        }
         .tab-btn:hover { background: #d0e6ff; }
         .tab-btn.active { background: #2196F3; color: white; }
 
-        /* Контент */
         .center-content { flex: 1; display: flex; justify-content: center; }
-        .content { width: 100%; max-width: 700px; }
-        .tab-content { display: none; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .content { width: 100%; max-width: 800px; }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
         .tab-content.active { display: block; }
 
-        /* Элементы форм */
-        label { display: block; margin: 18px 0 10px; font-weight: 600; color: #0d47a1; font-size: 16px; }
-        input, button, select { padding: 12px 16px; margin: 6px 0; border: 2px solid #ccc; border-radius: 12px; font-size: 16px; width: 100%; max-width: 100%; background: white; transition: border-color 0.3s; }
+        label { display: block; margin: 18px 0 8px; font-weight: 600; color: #0d47a1; font-size: 15px; }
+        input, button, select {
+            padding: 12px 16px;
+            margin: 5px 0;
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            font-size: 16px;
+            width: 100%;
+            background: white;
+            transition: border-color 0.3s;
+        }
         input:focus, select:focus { outline: none; border-color: #2196F3; }
-        button { background: #2196F3; color: white; border: none; cursor: pointer; font-weight: bold; transition: background 0.2s; width: auto; padding: 12px 28px; font-size: 17px; border-radius: 50px; margin-top: 15px; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            width: auto;
+            padding: 12px 28px;
+            border-radius: 50px;
+            margin-top: 15px;
+        }
         button:hover { background: #1976D2; }
 
-        /* Карточка товара */
-        .dish-card { border: 1px solid #c3e3ff; border-radius: 12px; padding: 15px; background: #f0f7ff; margin-top: 15px; display: none; }
+        /* Карточка блюда */
+        .dish-card {
+            border: 1px solid #c3e3ff;
+            border-radius: 12px;
+            padding: 15px;
+            background: #f0f7ff;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .dish-header { display: flex; gap: 15px; align-items: start; }
-        .dish-img { width: 90px; height: 90px; background-color: #eee; border-radius: 12px; background-size: cover; background-position: center; flex-shrink: 0; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .dish-img {
+            width: 80px;
+            height: 80px;
+            background-color: #eee;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         .dish-info h3 { margin: 0 0 5px 0; color: #1565C0; font-size: 18px; }
-        .dish-info p { margin: 3px 0; font-size: 15px; color: #444; }
-        .dish-details { margin-top: 10px; padding-top: 10px; border-top: 1px solid #dcebf7; font-size: 15px; color: #555; }
+        .dish-info p { margin: 3px 0; font-size: 14px; color: #444; }
 
-        /* Таблица Учета */
-        .accounting-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 15px; }
-        .accounting-table th, .accounting-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .accounting-table th { background-color: #e3f2fd; color: #0d47a1; }
+        /* Таблицы */
+        .accounting-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+        .accounting-table th, .accounting-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .accounting-table th { background-color: #e3f2fd; color: #0d47a1; font-weight: bold; }
         .accounting-table tr:nth-child(even) { background-color: #f9f9f9; }
 
-        /* Статусы заявок */
         .status-pending { color: #f57c00; font-weight: bold; }
         .status-approved { color: #2e7d32; font-weight: bold; }
         .status-rejected { color: #c62828; font-weight: bold; }
@@ -64,96 +170,96 @@
             .main-layout { flex-direction: column; align-items: center; gap: 20px; }
             .left-panel { width: 100%; max-width: 600px; flex-direction: column; padding: 20px; }
             .tabs { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px; }
-            .tab-btn { text-align: center; padding: 10px 12px; font-size: 14px; min-width: 100px; flex: 1; }
+            .tab-btn { text-align: center; padding: 10px; font-size: 14px; flex: 1; }
             .center-content { width: 100%; max-width: 600px; }
-            input, button, select { font-size: 17px; max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <header class="shapka">
-        <h1 class="title">Столовая — Школа 2098</h1>
+        <h1 class="title">Столовая Школа 2098</h1>
     </header>
 
     <div class="main-layout">
-        <!-- Левая панель -->
         <aside class="left-panel">
-            <button class="prof" onclick="window.location.href='/logout'" title="Выйти"></button>
+            <button class="prof" onclick="window.location.href='/logout'" title="Выйти">👤</button>
             <header class="head">
                 <h1>Панель повара</h1>
             </header>
             <nav class="tabs">
-                <button class="tab-btn active" data-tab="meals">Выдача питания</button>
-                <button class="tab-btn" data-tab="inventory">Остатки</button>
+                <button class="tab-btn active" data-tab="meals">Выдача</button>
+                <button class="tab-btn" data-tab="inventory">Склад</button>
                 <button class="tab-btn" data-tab="procurement">Закупки</button>
                 <button class="tab-btn" data-tab="stats">Статистика</button>
             </nav>
         </aside>
 
-        <!-- Контент -->
         <div class="center-content">
             <main class="content">
 
-                <!-- 1. ВЫДАЧА -->
+                <!-- 1. ВЫДАЧА ПИТАНИЯ (НОВАЯ) -->
                 <div id="meals" class="tab-content active">
                     <h2>Выдача питания</h2>
-                    <p style="color: #666; margin-bottom: 10px;">Выберите блюдо и введите данные ученика.</p>
-                    <label>Блюдо:</label>
-                    <select id="mealSelect"><option value="">-- Загрузка... --</option></select>
+                    <p style="color: #666; margin-bottom: 15px;">Введите ID или ФИО ученика для поиска заказов.</p>
 
-                    <div id="mealInfoCard" class="dish-card">
-                        <div class="dish-header">
-                            <div id="mealInfoImage" class="dish-img"></div>
-                            <div class="dish-info">
-                                <h3 id="mealInfoName">Название</h3>
-                                <p>На складе: <strong id="mealInfoStock" style="font-size: 1.1em;">0</strong></p>
-                            </div>
-                        </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <input type="text" id="studentSearchInput" placeholder="ID, Логин или Email ученика">
+                        <button id="btnSearchOrders" style="width: auto; margin: 0;">Поиск</button>
                     </div>
 
-                    <label>ID ученика:</label>
-                    <input type="text" id="studentId" placeholder="Например: 1">
-                    <button id="btnIssue">Выдать</button>
-                    <p id="issueMessage" style="margin-top:15px; font-weight:bold; min-height: 20px;"></p>
+                    <div id="studentOrdersResult">
+                        <!-- Здесь будут карточки с заказами -->
+                        <p style="color: #999; text-align: center;">Введите данные и нажмите поиск</p>
+                    </div>
                 </div>
 
-                <!-- 2. ОСТАТКИ -->
+                <!-- 2. СКЛАД -->
                 <div id="inventory" class="tab-content">
                     <h2>Складской учет</h2>
-                    <h3 style="color:#2e7d32; border-bottom:2px solid #a5d6a7; margin-top:20px; padding-bottom:5px;">Готовые блюда</h3>
+
+                    <h3 style="color:#2e7d32; border-bottom:2px solid #a5d6a7; margin-top:25px; padding-bottom:5px;">Готовые блюда</h3>
                     <div style="overflow-x: auto;">
                         <table class="accounting-table">
-                            <thead><tr><th>Название</th><th>Остаток</th></tr></thead>
-                            <tbody id="dishesTableBody"><tr><td colspan="2">Загрузка...</td></tr></tbody>
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Остаток</th>
+                                    <th>Заказано</th>
+                                    <th style="width: 80px;">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dishesTableBody"><tr><td colspan="4">Загрузка...</td></tr></tbody>
                         </table>
                     </div>
 
-                    <h3 style="color:#ef6c00; border-bottom:2px solid #ffcc80; margin-top:20px; padding-bottom:5px;">Продукты (Сырье)</h3>
+                    <h3 style="color:#ef6c00; border-bottom:2px solid #ffcc80; margin-top:25px; padding-bottom:5px;">Продукты (Сырье)</h3>
                     <div style="overflow-x: auto;">
                         <table class="accounting-table">
-                            <thead><tr><th>Продукт</th><th>Остаток</th><th>Мин. запас</th></tr></thead>
-                            <tbody id="ingredientsTableBody"><tr><td colspan="3">Загрузка...</td></tr></tbody>
+                            <thead>
+                                <tr>
+                                    <th>Продукт</th>
+                                    <th>Остаток</th>
+                                    <th>Мин. запас</th>
+                                    <th style="width: 80px;">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ingredientsTableBody"><tr><td colspan="4">Загрузка...</td></tr></tbody>
                         </table>
                     </div>
-                    <button onclick="loadInventoryData()" style="background:#607d8b; margin-top:20px;">Обновить</button>
+                    <button onclick="loadInventoryData()" style="background:#607d8b; margin-top:20px;">Обновить данные</button>
                 </div>
 
                 <!-- 3. ЗАКУПКИ -->
                 <div id="procurement" class="tab-content">
                     <h2>Заявки на закупку</h2>
-                    <p style="color:#666;">Создание заявок на пополнение продуктов.</p>
-
                     <div style="background:#f0f7ff; padding:20px; border-radius:12px; border:1px solid #c3e3ff; margin-bottom:30px;">
-                        <label>Продукт:</label>
+                        <label>Выберите продукт:</label>
                         <select id="procurementSelect"><option>Загрузка...</option></select>
-
-                        <label>Количество:</label>
-                        <input type="number" id="procurementQty" placeholder="10">
-
+                        <label>Необходимое количество:</label>
+                        <input type="number" id="procurementQty" placeholder="Например: 10">
                         <button id="btnRequest" style="background:#28a745;">Отправить заявку</button>
                     </div>
-
                     <h3>История заявок</h3>
                     <div style="overflow-x: auto;">
                         <table class="accounting-table">
@@ -166,39 +272,36 @@
                 <!-- 4. СТАТИСТИКА -->
                 <div id="stats" class="tab-content">
                     <h2>Статистика за сегодня</h2>
-
-                    <h3 style="color: #1976D2; border-bottom: 2px solid #BBDEFB; padding-bottom: 5px; margin-bottom: 15px;">Завтрак</h3>
-                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom: 30px;">
+                    <h3 style="color: #1976D2; border-bottom: 2px solid #BBDEFB; padding-bottom: 5px; margin: 20px 0 15px;">Завтрак</h3>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
                         <div style="flex:1; background:#e3f2fd; padding:20px; border-radius:12px; text-align:center; border: 1px solid #bbdefb;">
-                            <div style="font-size:3em; font-weight:bold; color:#1565C0;" id="statIssuedBreakfast">0</div>
-                            <div style="color:#0D47A1;">Выдано</div>
+                            <div style="font-size:2.5em; font-weight:bold; color:#1565C0;" id="statIssuedBreakfast">0</div>
+                            <div style="color:#0D47A1;">Выдано порций</div>
                         </div>
                         <div style="flex:1; background:#fff3e0; padding:20px; border-radius:12px; text-align:center; border: 1px solid #ffe0b2;">
-                            <div style="font-size:3em; font-weight:bold; color:#ef6c00;" id="statSoldBreakfast">0</div>
-                            <div style="color:#e65100;">Заказано</div>
+                            <div style="font-size:2.5em; font-weight:bold; color:#ef6c00;" id="statSoldBreakfast">0</div>
+                            <div style="color:#e65100;">Всего заказано</div>
                         </div>
                     </div>
-
-                    <h3 style="color: #388E3C; border-bottom: 2px solid #C8E6C9; padding-bottom: 5px; margin-bottom: 15px;">Обед</h3>
+                    <h3 style="color: #388E3C; border-bottom: 2px solid #C8E6C9; padding-bottom: 5px; margin: 30px 0 15px;">Обед</h3>
                     <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom: 30px;">
                         <div style="flex:1; background:#e8f5e9; padding:20px; border-radius:12px; text-align:center; border: 1px solid #c8e6c9;">
-                            <div style="font-size:3em; font-weight:bold; color:#2e7d32;" id="statIssuedLunch">0</div>
-                            <div style="color:#1b5e20;">Выдано</div>
+                            <div style="font-size:2.5em; font-weight:bold; color:#2e7d32;" id="statIssuedLunch">0</div>
+                            <div style="color:#1b5e20;">Выдано порций</div>
                         </div>
                         <div style="flex:1; background:#fff3e0; padding:20px; border-radius:12px; text-align:center; border: 1px solid #ffe0b2;">
-                            <div style="font-size:3em; font-weight:bold; color:#ef6c00;" id="statSoldLunch">0</div>
-                            <div style="color:#e65100;">Заказано</div>
+                            <div style="font-size:2.5em; font-weight:bold; color:#ef6c00;" id="statSoldLunch">0</div>
+                            <div style="color:#e65100;">Всего заказано</div>
                         </div>
                     </div>
-
                     <h3>Популярные блюда</h3>
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                             <thead><tr style="background: #e3f2fd; text-align: left;"><th style="padding: 12px;">Блюдо</th><th style="padding: 12px; text-align: right;">Кол-во</th></tr></thead>
-                            <tbody id="statTableBody"><tr><td colspan="2" style="padding: 15px; text-align: center; color: #777;">Загрузка...</td></tr></tbody>
+                            <tbody id="statTableBody"><tr><td colspan="2" style="padding: 15px; text-align: center; color: #777;">Нет данных</td></tr></tbody>
                         </table>
                     </div>
-                    <button onclick="loadStats()" style="margin-top: 20px; background: #607d8b;">Обновить данные</button>
+                    <button onclick="loadStats()" style="margin-top: 20px; background: #607d8b;">🔄 Обновить данные</button>
                 </div>
 
             </main>
