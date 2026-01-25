@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Повар — Столовая Школа 2098</title>
     <style>
-        /* === БАЗОВЫЕ СТИЛИ === */
+        /* Основные стили, сброс и фон */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Candara, sans-serif; }
         body { background: linear-gradient(135deg, #e3f2fd, #ffffff); color: #333; min-height: 100vh; padding-top: 70px; }
 
+        /* Шапка, фиксированная */
         .shapka {
             background: white;
             padding: 15px 20px;
@@ -24,6 +25,7 @@
         }
         .title { color: #0d47a1; font-size: 20px; font-weight: bold; text-align: center; }
 
+        /* Общий макет: левая панель + контент */
         .main-layout {
             display: flex;
             gap: 20px;
@@ -32,6 +34,7 @@
             padding: 0 15px 30px;
         }
 
+        /* Левая колонка с навигацией */
         .left-panel {
             background: white;
             padding: 20px;
@@ -70,6 +73,7 @@
         }
         .head h1 { font-size: 18px; margin: 0; font-weight: bold; }
 
+        /* Кнопки навигации (табы) */
         .tabs { display: flex; flex-direction: column; gap: 12px; width: 100%; }
         .tab-btn {
             padding: 12px;
@@ -85,6 +89,7 @@
         .tab-btn:hover { background: #d0e6ff; }
         .tab-btn.active { background: #2196F3; color: white; }
 
+        /* Центральный блок контента */
         .center-content { flex: 1; display: flex; justify-content: center; }
         .content { width: 100%; max-width: 800px; }
         .tab-content {
@@ -96,6 +101,7 @@
         }
         .tab-content.active { display: block; }
 
+        /* Общие элементы форм */
         label { display: block; margin: 18px 0 8px; font-weight: 600; color: #0d47a1; font-size: 15px; }
         input, button, select {
             padding: 12px 16px;
@@ -121,7 +127,7 @@
         }
         button:hover { background: #1976D2; }
 
-        /* Карточка блюда */
+        /* Стили для карточек блюд (используются в меню) */
         .dish-card {
             border: 1px solid #c3e3ff;
             border-radius: 12px;
@@ -147,7 +153,7 @@
         .dish-info h3 { margin: 0 0 5px 0; color: #1565C0; font-size: 18px; }
         .dish-info p { margin: 3px 0; font-size: 14px; color: #444; }
 
-        /* Таблицы */
+        /* Таблицы для учета и заявок */
         .accounting-table {
             width: 100%;
             border-collapse: collapse;
@@ -162,10 +168,43 @@
         .accounting-table th { background-color: #e3f2fd; color: #0d47a1; font-weight: bold; }
         .accounting-table tr:nth-child(even) { background-color: #f9f9f9; }
 
+        /* Цветовые статусы для заявок */
         .status-pending { color: #f57c00; font-weight: bold; }
         .status-approved { color: #2e7d32; font-weight: bold; }
         .status-rejected { color: #c62828; font-weight: bold; }
 
+        /* Модальное окно (для создания блюда/продукта) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            width: 450px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Переключатель типа создаваемого объекта (блюдо/продукт) */
+        .type-switch { display: flex; background: #eee; border-radius: 8px; padding: 4px; margin-bottom: 15px; }
+        .type-switch label { margin: 0; flex: 1; text-align: center; padding: 8px; cursor: pointer; border-radius: 6px; }
+        .type-switch input { display: none; }
+        .type-switch input:checked + span { background: white; color: #2196F3; font-weight: bold; padding: 8px; border-radius: 6px; display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .type-switch span { display: block; padding: 8px; }
+        .hidden-field { display: none; }
+
+        /* Адаптив под мобилки */
         @media (max-width: 768px) {
             .main-layout { flex-direction: column; align-items: center; gap: 20px; }
             .left-panel { width: 100%; max-width: 600px; flex-direction: column; padding: 20px; }
@@ -189,6 +228,7 @@
             </header>
             <nav class="tabs">
                 <button class="tab-btn active" data-tab="meals">Выдача</button>
+                <button class="tab-btn" data-tab="menu">Меню</button>
                 <button class="tab-btn" data-tab="inventory">Склад</button>
                 <button class="tab-btn" data-tab="procurement">Закупки</button>
                 <button class="tab-btn" data-tab="stats">Статистика</button>
@@ -198,7 +238,6 @@
         <div class="center-content">
             <main class="content">
 
-                <!-- 1. ВЫДАЧА ПИТАНИЯ (НОВАЯ) -->
                 <div id="meals" class="tab-content active">
                     <h2>Выдача питания</h2>
                     <p style="color: #666; margin-bottom: 15px;">Введите ID или ФИО ученика для поиска заказов.</p>
@@ -209,12 +248,47 @@
                     </div>
 
                     <div id="studentOrdersResult">
-                        <!-- Здесь будут карточки с заказами -->
                         <p style="color: #999; text-align: center;">Введите данные и нажмите поиск</p>
                     </div>
                 </div>
 
-                <!-- 2. СКЛАД -->
+                <div id="menu" class="tab-content">
+                    <h2>Составление меню</h2>
+
+                    <div style="text-align: right; margin-bottom: 15px;">
+                        <button onclick="openCreateModal()" style="background: #673AB7; width: auto;">Добавить новое (Блюдо/Продукт)</button>
+                    </div>
+
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <label style="margin:0;">Дата:</label>
+                        <input type="date" id="menuDate" style="width: auto;">
+                        <button onclick="loadMenuEditor()" style="margin:0; padding: 10px 20px; width: auto;">Загрузить</button>
+                    </div>
+
+                    <div style="background:#f0f7ff; padding:20px; border-radius:12px; border:1px solid #c3e3ff; margin-bottom:30px;">
+                        <h3 style="margin-top:0; color:#0d47a1;">Добавить позицию в меню</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <div>
+                                <label>Прием пищи:</label>
+                                <select id="menuMealType">
+                                    <option value="breakfast">Завтрак</option>
+                                    <option value="lunch">Обед</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Блюдо:</label>
+                                <select id="menuDishSelect"><option>Загрузка...</option></select>
+                            </div>
+                        </div>
+                        <button onclick="addMenuItem()" style="background:#28a745; width:100%; margin-top:10px;">Добавить в меню</button>
+                    </div>
+
+                    <h3>Меню на выбранную дату</h3>
+                    <div id="menuListContainer">
+                        <p style="color:#777;">Нажмите "Загрузить"</p>
+                    </div>
+                </div>
+
                 <div id="inventory" class="tab-content">
                     <h2>Складской учет</h2>
 
@@ -250,16 +324,18 @@
                     <button onclick="loadInventoryData()" style="background:#607d8b; margin-top:20px;">Обновить данные</button>
                 </div>
 
-                <!-- 3. ЗАКУПКИ -->
                 <div id="procurement" class="tab-content">
                     <h2>Заявки на закупку</h2>
                     <div style="background:#f0f7ff; padding:20px; border-radius:12px; border:1px solid #c3e3ff; margin-bottom:30px;">
                         <label>Выберите продукт:</label>
                         <select id="procurementSelect"><option>Загрузка...</option></select>
+
                         <label>Необходимое количество:</label>
                         <input type="number" id="procurementQty" placeholder="Например: 10">
+
                         <button id="btnRequest" style="background:#28a745;">Отправить заявку</button>
                     </div>
+
                     <h3>История заявок</h3>
                     <div style="overflow-x: auto;">
                         <table class="accounting-table">
@@ -269,9 +345,9 @@
                     </div>
                 </div>
 
-                <!-- 4. СТАТИСТИКА -->
                 <div id="stats" class="tab-content">
                     <h2>Статистика за сегодня</h2>
+
                     <h3 style="color: #1976D2; border-bottom: 2px solid #BBDEFB; padding-bottom: 5px; margin: 20px 0 15px;">Завтрак</h3>
                     <div style="display:flex; gap:20px; flex-wrap:wrap;">
                         <div style="flex:1; background:#e3f2fd; padding:20px; border-radius:12px; text-align:center; border: 1px solid #bbdefb;">
@@ -283,6 +359,7 @@
                             <div style="color:#e65100;">Всего заказано</div>
                         </div>
                     </div>
+
                     <h3 style="color: #388E3C; border-bottom: 2px solid #C8E6C9; padding-bottom: 5px; margin: 30px 0 15px;">Обед</h3>
                     <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom: 30px;">
                         <div style="flex:1; background:#e8f5e9; padding:20px; border-radius:12px; text-align:center; border: 1px solid #c8e6c9;">
@@ -294,6 +371,7 @@
                             <div style="color:#e65100;">Всего заказано</div>
                         </div>
                     </div>
+
                     <h3>Популярные блюда</h3>
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
@@ -301,10 +379,61 @@
                             <tbody id="statTableBody"><tr><td colspan="2" style="padding: 15px; text-align: center; color: #777;">Нет данных</td></tr></tbody>
                         </table>
                     </div>
-                    <button onclick="loadStats()" style="margin-top: 20px; background: #607d8b;">🔄 Обновить данные</button>
+                    <button onclick="loadStats()" style="margin-top: 20px; background: #607d8b;">Обновить данные</button>
                 </div>
 
             </main>
+        </div>
+    </div>
+
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">Добавить в базу</h3>
+
+            <div class="type-switch">
+                <label><input type="radio" name="createType" value="dish" checked onclick="toggleCreateFields()"><span>Блюдо</span></label>
+                <label><input type="radio" name="createType" value="ingredient" onclick="toggleCreateFields()"><span>Продукт</span></label>
+            </div>
+
+            <label>Название:</label>
+            <input type="text" id="createName" required>
+
+            <label>Начальный остаток:</label>
+            <input type="number" id="createStock" value="0">
+
+            <div id="fieldsDish">
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1"><label>Калории:</label><input type="number" id="createCals"></div>
+                    <div style="flex:1"><label>Цена (₽):</label><input type="number" id="createPrice"></div>
+                </div>
+                <label>Фото:</label>
+                <input type="file" id="createImage">
+                <label>Состав (выберите ингредиенты):</label>
+                <div id="ingredientCheckboxes" style="max-height:150px; overflow-y:auto; border:1px solid #ccc; border-radius:8px; padding:10px; margin-top:5px;">Загрузка...</div>
+            </div>
+
+            <!-- Поля, специфичные для ингредиента -->
+            <div id="fieldsIngredient" class="hidden-field">
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1">
+                        <label>Ед. изм:</label>
+                        <select id="createUnit">
+                            <option value="кг">кг</option>
+                            <option value="л">л</option>
+                            <option value="шт">шт</option>
+                            <option value="г">г</option>
+                            <option value="мл">мл</option>
+                            <option value="упак">упак</option>
+                        </select>
+                    </div>
+                    <div style="flex:1"><label>Мин. запас:</label><input type="number" id="createMinQty" value="5"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="submitCreate()" style="background: #4CAF50; flex: 1;">Создать</button>
+                <button onclick="document.getElementById('createModal').style.display='none'" style="background: #757575; flex: 1;">Отмена</button>
+            </div>
         </div>
     </div>
 

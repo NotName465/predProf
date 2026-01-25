@@ -7,40 +7,27 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Candara, sans-serif; }
         body { background: linear-gradient(135deg, #e3f2fd, #ffffff); color: #333; min-height: 100vh; padding-top: 70px; }
-
-        /* Шапка */
         .shapka { background: white; padding: 15px 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; width: 100%; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
         .menu-toggle { display: none; background: #2196F3; color: white; border: none; width: 40px; height: 40px; border-radius: 8px; font-size: 18px; cursor: pointer; }
         .title { color: #0d47a1; font-size: 20px; font-weight: bold; text-align: center; flex-grow: 1; margin: 0 10px; }
-
-        /* Макет */
         .main-layout { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 15px 30px; }
         .left-panel { width: 220px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
         .prof { background: #2196F3; color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3); }
         .head { margin-bottom: 20px; padding: 10px; background: #e3f2fd; color: #0d47a1; border-radius: 10px; text-align: center; width: 100%; }
         .head h1 { font-size: 18px; margin: 0; font-weight: bold; }
-
-        /* Табы */
         .tabs { display: flex; flex-direction: column; gap: 12px; width: 100%; }
         .tab-btn { padding: 12px; border: none; background: #f5f9ff; border-radius: 12px; cursor: pointer; text-align: left; font-weight: bold; color: #555; transition: all 0.2s; }
         .tab-btn:hover { background: #d0e6ff; }
         .tab-btn.active { background: #2196F3; color: white; }
-
-        /* Контент */
         .center-content { flex: 1; display: flex; justify-content: center; }
         .content { width: 100%; max-width: 800px; }
         .tab-content { display: none; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .tab-content.active { display: block; }
-
         h2 { color: #0d47a1; margin-bottom: 20px; font-size: 24px; }
-
-        /* Карточки статистики */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
         .stat-card { background: #f8fbff; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #2196F3; }
         .stat-value { font-size: 28px; font-weight: bold; color: #0d47a1; margin: 10px 0; }
         .stat-label { color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Карточки заявок и пользователей */
         .request-card { background: #f9f9f9; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0; }
         .request-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .request-title { font-weight: bold; color: #0d47a1; font-size: 16px; }
@@ -48,30 +35,21 @@
         .status-pending { background: #fff3e0; color: #f57c00; }
         .status-approved { background: #e8f5e9; color: #388e3c; }
         .status-rejected { background: #ffebee; color: #c62828; }
-
-        /* Кнопки и формы */
         .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
         .btn-small { padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; }
         .btn-approve { background: #4caf50; color: white; }
         .btn-reject { background: #f44336; color: white; }
         .btn-neutral { background: #757575; color: white; }
-
         input, button, select, textarea { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; transition: background 0.2s; }
-
-        /* Таблицы */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { background: #e3f2fd; color: #0d47a1; text-align: left; padding: 12px; font-weight: bold; }
         td { padding: 12px; border-bottom: 1px solid #eee; }
         tr:hover { background: #f5f9ff; }
-
-        /* Модальные окна */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
-
         .loading { text-align: center; padding: 40px; color: #666; }
         .error { color: #f44336; text-align: center; padding: 20px; }
-
         @media (max-width: 768px) {
             .shapka { padding: 12px 15px; }
             .title { font-size: 18px; }
@@ -94,7 +72,7 @@
 
     <div class="main-layout">
         <aside class="left-panel" id="leftPanel">
-            <button class="prof" onclick="window.location.href='/logout'" title="Выйти">🚪</button>
+            <button class="prof" onclick="window.location.href='/logout'">🚪</button>
             <header class="head">
                 <h1>Панель администратора</h1>
             </header>
@@ -109,35 +87,21 @@
 
         <div class="center-content">
             <main class="content">
-                <!-- 1. СТАТИСТИКА -->
                 <div id="stats" class="tab-content active">
                     <h2>📊 Статистика системы</h2>
                     <div id="statsLoading" class="loading">Загрузка...</div>
                     <div id="statsContainer" style="display: none;">
                         <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-label">Посетителей сегодня</div>
-                                <div class="stat-value" id="attendanceToday">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Выручка сегодня</div>
-                                <div class="stat-value" id="revenueToday">0 ₽</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Всего выдано</div>
-                                <div class="stat-value" id="totalIssued">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Активных подписок</div>
-                                <div class="stat-value" id="activeSubscriptions">0</div>
-                            </div>
+                            <div class="stat-card"><div class="stat-label">Посетителей сегодня</div><div class="stat-value" id="attendanceToday">0</div></div>
+                            <div class="stat-card"><div class="stat-label">Выручка сегодня</div><div class="stat-value" id="revenueToday">0 ₽</div></div>
+                            <div class="stat-card"><div class="stat-label">Всего выдано</div><div class="stat-value" id="totalIssued">0</div></div>
+                            <div class="stat-card"><div class="stat-label">Активных подписок</div><div class="stat-value" id="activeSubscriptions">0</div></div>
                         </div>
                         <h3 style="margin-top: 30px; color: #0d47a1;">📈 Популярные блюда (сегодня)</h3>
                         <div id="dishesChart" style="margin-top: 10px;"></div>
                     </div>
                 </div>
 
-                <!-- 2. ЗАКУПКИ -->
                 <div id="requests" class="tab-content">
                     <h2>🛒 Заявки на закупку</h2>
                     <div id="requestsLoading" class="loading">Загрузка...</div>
@@ -147,20 +111,14 @@
                     </div>
                 </div>
 
-                <!-- 3. ОТЧЕТЫ -->
                 <div id="reports" class="tab-content">
                     <h2>📈 Финансовые отчёты</h2>
-                    <p style="color: #666; margin-bottom: 20px;">Выручка по дням за последнюю неделю</p>
                     <div id="reportsLoading" class="loading">Загрузка...</div>
                     <div id="reportsContainer" style="display: none; overflow-x: auto;">
-                        <table>
-                            <thead><tr><th>Дата</th><th>Выручка</th><th>Транзакций</th></tr></thead>
-                            <tbody id="reportsTable"></tbody>
-                        </table>
+                        <table><thead><tr><th>Дата</th><th>Выручка</th><th>Транзакций</th></tr></thead><tbody id="reportsTable"></tbody></table>
                     </div>
                 </div>
 
-                <!-- 4. ПОЛЬЗОВАТЕЛИ -->
                 <div id="users" class="tab-content">
                     <h2>👥 Пользователи</h2>
                     <input type="text" id="searchUser" placeholder="🔍 Поиск..." style="margin-bottom: 20px;">
@@ -168,69 +126,19 @@
                     <div id="usersList"></div>
                 </div>
 
-                <!-- 5. МЕНЮ -->
                 <div id="menu" class="tab-content">
-                    <h2>🍽️ Меню</h2>
-                    <button class="btn-small btn-neutral" onclick="showAddDishForm()" style="margin-bottom: 20px;">➕ Добавить блюдо</button>
+                    <h2>🍽️ Меню столовой</h2>
                     <div id="menuManagementContainer"></div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- МОДАЛКИ -->
-    <div id="confirmModal" class="modal">
-        <div class="modal-content">
-            <h3 id="modalTitle">Подтверждение</h3>
-            <p id="modalMessage"></p>
-            <div class="action-buttons">
-                <button class="btn-small btn-approve" id="modalConfirmBtn">Да</button>
-                <button class="btn-small btn-neutral" onclick="closeModal()">Нет</button>
-            </div>
-        </div>
-    </div>
+    <div id="confirmModal" class="modal"><div class="modal-content"><h3 id="modalTitle"></h3><p id="modalMessage"></p><div class="action-buttons"><button class="btn-small btn-approve" id="modalConfirmBtn">Да</button><button class="btn-small btn-neutral" onclick="closeModal()">Нет</button></div></div></div>
 
-    <div id="addDishModal" class="modal">
-        <div class="modal-content">
-            <h3>Добавить блюдо</h3>
-            <form id="addDishForm">
-                <div style="margin-bottom: 10px;">
-                    <label>Название</label><input type="text" id="dishName" required>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <div><label>Цена (₽)</label><input type="number" id="dishPrice" required value="100"></div>
-                    <div><label>Калории</label><input type="number" id="dishCalories" value="300"></div>
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label>Начальный остаток</label><input type="number" id="dishStock" required value="50">
-                </div>
-                <div class="action-buttons">
-                    <button type="submit" class="btn-small btn-approve">Сохранить</button>
-                    <button type="button" class="btn-small btn-neutral" onclick="closeAddDishModal()">Отмена</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="editUserModal" class="modal">
-        <div class="modal-content">
-            <h3>Изменить роль</h3>
-            <p id="editUserName" style="margin-bottom: 15px; color: #555;"></p>
-            <input type="hidden" id="editUserId">
-            <select id="newRoleSelect" style="margin-bottom: 20px;">
-                <option value="student">Ученик</option>
-                <option value="cook">Повар</option>
-                <option value="admin">Администратор</option>
-            </select>
-            <div class="action-buttons">
-                <button class="btn-small btn-approve" onclick="saveUserRole()">Сохранить</button>
-                <button class="btn-small btn-neutral" onclick="document.getElementById('editUserModal').style.display='none'">Отмена</button>
-            </div>
-        </div>
-    </div>
+    <div id="editUserModal" class="modal"><div class="modal-content"><h3>Изменить роль</h3><p id="editUserName" style="margin-bottom:15px; color:#555;"></p><input type="hidden" id="editUserId"><select id="newRoleSelect" style="margin-bottom:20px;"><option value="student">Ученик</option><option value="cook">Повар</option><option value="admin">Администратор</option></select><div class="action-buttons"><button class="btn-small btn-approve" onclick="saveUserRole()">Сохранить</button><button class="btn-small btn-neutral" onclick="document.getElementById('editUserModal').style.display='none'">Отмена</button></div></div></div>
 
     <script>
-        // === ПЕРЕМЕННЫЕ И ИНИЦИАЛИЗАЦИЯ ===
         let currentRequestId = null;
         let currentAction = null;
 
@@ -247,11 +155,9 @@
                 btn.addEventListener('click', () => {
                     btns.forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
                     btn.classList.add('active');
                     const id = btn.getAttribute('data-tab');
                     document.getElementById(id).classList.add('active');
-
                     if(id === 'stats') loadStats();
                     if(id === 'requests') loadRequests();
                     if(id === 'reports') loadReports();
@@ -265,12 +171,9 @@
             const toggle = document.getElementById('menuToggle');
             const panel = document.getElementById('leftPanel');
             toggle.addEventListener('click', () => panel.classList.toggle('open'));
-            document.addEventListener('click', (e) => {
-                if(!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
-            });
+            document.addEventListener('click', (e) => { if(!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open'); });
         }
 
-        // === СТАТИСТИКА ===
         async function loadStats() {
             try {
                 const res = await fetch('/api/admin/stats');
@@ -281,13 +184,9 @@
                     document.getElementById('attendanceToday').textContent = data.attendance_today || 0;
                     document.getElementById('revenueToday').textContent = (data.revenue_today || 0) + ' ₽';
                     document.getElementById('totalIssued').textContent = data.total_issued || 0;
-
-                    // Подписки
                     const subRes = await fetch('/api/admin/active-subscriptions');
                     const subData = await subRes.json();
                     document.getElementById('activeSubscriptions').textContent = subData.count || 0;
-
-                    // Популярные
                     loadPopular();
                 }
             } catch(e) { console.error(e); }
@@ -300,44 +199,27 @@
             if(data.length) {
                 container.innerHTML = data.map(d => `
                     <div style="margin-bottom: 10px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                            <span>${d.name}</span><span>${d.count} шт</span>
-                        </div>
-                        <div style="height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden;">
-                            <div style="height: 100%; width: ${d.percentage}%; background: #2196F3;"></div>
-                        </div>
-                    </div>
-                `).join('');
+                        <div style="display: flex; justify-content: space-between; font-size: 14px;"><span>${d.name}</span><span>${d.count} шт</span></div>
+                        <div style="height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: ${d.percentage}%; background: #2196F3;"></div></div>
+                    </div>`).join('');
             } else container.innerHTML = '<p>Нет данных</p>';
         }
 
-        // === ЗАКУПКИ ===
         async function loadRequests() {
             const res = await fetch('/api/purchase_requests');
             const data = await res.json();
             document.getElementById('requestsLoading').style.display = 'none';
             document.getElementById('requestsContainer').style.display = 'block';
-
             const list = document.getElementById('requestsList');
             if(!data.length) { document.getElementById('noRequests').style.display = 'block'; list.innerHTML = ''; return; }
             document.getElementById('noRequests').style.display = 'none';
-
             list.innerHTML = data.map(r => {
                 const statusMap = {'pending':'Ожидает', 'approved':'Одобрено', 'rejected':'Отклонено'};
                 return `
                 <div class="request-card">
-                    <div class="request-header">
-                        <div class="request-title">${r.ingredient_name}</div>
-                        <span class="request-status status-${r.status}">${statusMap[r.status]||r.status}</span>
-                    </div>
-                    <div style="font-size: 14px; color: #666; margin-bottom: 10px;">
-                        Кол-во: ${r.quantity} ${r.unit} | От: ${r.requester} | Дата: ${new Date(r.request_date).toLocaleDateString()}
-                    </div>
-                    ${r.status === 'pending' ? `
-                    <div class="action-buttons">
-                        <button class="btn-small btn-approve" onclick="confirmRequest(${r.id}, 'approve')">Одобрить</button>
-                        <button class="btn-small btn-reject" onclick="confirmRequest(${r.id}, 'reject')">Отклонить</button>
-                    </div>` : ''}
+                    <div class="request-header"><div class="request-title">${r.ingredient_name}</div><span class="request-status status-${r.status}">${statusMap[r.status]||r.status}</span></div>
+                    <div style="font-size: 14px; color: #666; margin-bottom: 10px;">Кол-во: ${r.quantity} ${r.unit} | От: ${r.requester} | Дата: ${new Date(r.request_date).toLocaleDateString()}</div>
+                    ${r.status === 'pending' ? `<div class="action-buttons"><button class="btn-small btn-approve" onclick="confirmRequest(${r.id}, 'approve')">Одобрить</button><button class="btn-small btn-reject" onclick="confirmRequest(${r.id}, 'reject')">Отклонить</button></div>` : ''}
                 </div>`;
             }).join('');
         }
@@ -345,51 +227,34 @@
         function confirmRequest(id, action) {
             currentRequestId = id;
             currentAction = action;
-            const title = action === 'approve' ? 'Одобрить закупку?' : 'Отклонить заявку?';
-            const msg = action === 'approve' ? 'Ингредиенты будут добавлены на склад.' : 'Заявка будет помечена как отклоненная.';
-            showModal(title, msg, 'Подтвердить');
+            showModal(action === 'approve' ? 'Одобрить?' : 'Отклонить?', action === 'approve' ? 'Ингредиенты будут добавлены на склад.' : 'Заявка будет отклонена.', 'Подтвердить');
         }
 
         async function confirmAction() {
             if (!currentRequestId) return;
             const status = currentAction === 'approve' ? 'approved' : 'rejected';
-            await fetch(`/api/purchase_requests/${currentRequestId}`, {
-                method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status})
-            });
+            await fetch(`/api/purchase_requests/${currentRequestId}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status}) });
             closeModal();
             loadRequests();
         }
 
-        // === ОТЧЕТЫ ===
         async function loadReports() {
             const res = await fetch('/api/admin/reports');
             const data = await res.json();
             document.getElementById('reportsLoading').style.display = 'none';
             document.getElementById('reportsContainer').style.display = 'block';
-
-            document.getElementById('reportsTable').innerHTML = data.length ? data.map(r => `
-                <tr>
-                    <td>${new Date(r.date).toLocaleDateString()}</td>
-                    <td>${r.revenue} ₽</td>
-                    <td>${r.transactions}</td>
-                </tr>
-            `).join('') : '<tr><td colspan="3" style="text-align:center">Нет данных</td></tr>';
+            document.getElementById('reportsTable').innerHTML = data.length ? data.map(r => `<tr><td>${new Date(r.date).toLocaleDateString()}</td><td>${r.revenue} ₽</td><td>${r.transactions}</td></tr>`).join('') : '<tr><td colspan="3" style="text-align:center">Нет данных</td></tr>';
         }
 
-        // === ПОЛЬЗОВАТЕЛИ ===
         async function loadUsers() {
             const res = await fetch('/api/admin/users');
             const users = await res.json();
             document.getElementById('usersLoading').style.display = 'none';
             document.getElementById('usersList').innerHTML = users.map(u => `
                 <div class="request-card" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div style="font-weight:bold; color:#0d47a1;">${u.username} <span style="font-size:12px; background:#eee; padding:2px 6px; border-radius:4px;">${u.role}</span></div>
-                        <div style="font-size:13px; color:#666;">${u.email} | Заказов: ${u.total_orders}</div>
-                    </div>
+                    <div><div style="font-weight:bold; color:#0d47a1;">${u.username} <span style="font-size:12px; background:#eee; padding:2px 6px; border-radius:4px;">${u.role}</span></div><div style="font-size:13px; color:#666;">${u.email} | Заказов: ${u.total_orders}</div></div>
                     <button class="btn-small btn-neutral" onclick="editUser(${u.id}, '${u.username}')">Роль</button>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
         function editUser(id, name) {
@@ -401,9 +266,7 @@
         async function saveUserRole() {
             const id = document.getElementById('editUserId').value;
             const role = document.getElementById('newRoleSelect').value;
-            await fetch(`/api/admin/users/${id}`, {
-                method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({role})
-            });
+            await fetch(`/api/admin/users/${id}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({role}) });
             document.getElementById('editUserModal').style.display = 'none';
             loadUsers();
         }
@@ -411,46 +274,17 @@
         function setupSearch() {
             document.getElementById('searchUser').addEventListener('input', function() {
                 const term = this.value.toLowerCase();
-                const cards = document.querySelectorAll('#usersList .request-card');
-                cards.forEach(card => {
-                    const text = card.innerText.toLowerCase();
-                    card.style.display = text.includes(term) ? 'flex' : 'none';
-                });
+                document.querySelectorAll('#usersList .request-card').forEach(card => card.style.display = card.innerText.toLowerCase().includes(term) ? 'flex' : 'none');
             });
         }
 
-        // === МЕНЮ ===
         async function loadMenu() {
             const res = await fetch('/api/dishes');
             const dishes = await res.json();
             document.getElementById('menuManagementContainer').innerHTML = dishes.map(d => `
-                <div class="request-card">
-                    <div style="font-weight:bold; color:#0d47a1;">${d.name}</div>
-                    <div style="font-size:13px;">${d.calories} ккал | ${d.price} ₽ | Остаток: ${d.current_stock}</div>
-                </div>
-            `).join('');
+                <div class="request-card"><div style="font-weight:bold; color:#0d47a1;">${d.name}</div><div style="font-size:13px;">${d.calories} ккал | ${d.price} ₽ | Остаток: ${d.stock_quantity}</div></div>`).join('');
         }
 
-        function showAddDishForm() { document.getElementById('addDishModal').style.display = 'flex'; }
-        function closeAddDishModal() { document.getElementById('addDishModal').style.display = 'none'; }
-
-        document.getElementById('addDishForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                name: document.getElementById('dishName').value,
-                price: document.getElementById('dishPrice').value,
-                calories: document.getElementById('dishCalories').value,
-                stock: document.getElementById('dishStock').value
-            };
-
-            await fetch('/api/add_dish', {
-                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
-            });
-            closeAddDishModal();
-            loadMenu();
-        });
-
-        // МОДАЛКИ
         function showModal(title, msg, btnText) {
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalMessage').textContent = msg;

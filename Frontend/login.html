@@ -173,12 +173,14 @@
       color: #c62828;
     }
 
+    /* Для мобилок */
     button, .knopka_formy, .ssylka_pereklyucheniya {
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       -webkit-appearance: none;
     }
 
+    /* Адаптивка */
     @media (max-width: 360px) {
       .spisok_allergenov {
         grid-template-columns: repeat(2, 1fr);
@@ -239,12 +241,13 @@
           <div id="confirmPasswordError" class="error"></div>
         </div>
 
+        <!-- Блок с аллергенов -->
         <div class="gruppa_polei">
           <div class="metka_poliya">Аллергены и непереносимости (опционально)</div>
           <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Отметьте продукты, на которые у вас аллергия:</p>
           <div id="allergensLoading" class="loading">Загрузка списка аллергенов...</div>
           <div id="spisok_allergenov" class="spisok_allergenov" style="display: none;">
-            <!-- Здесь будут загружены чекбоксы с аллергенами -->
+            <!--Аллергены -->
           </div>
         </div>
 
@@ -257,7 +260,7 @@
   </div>
 
   <script>
-    // Функция переключения между формами
+    // Переключение логин/регистрация
     function pokazat(formType) {
       const loginForm = document.getElementById('forma_vhoda');
       const registerForm = document.getElementById('forma_registracii');
@@ -270,11 +273,10 @@
         loginForm.classList.add('forma_skryta');
         registerForm.classList.remove('forma_skryta');
         clearMessages();
-        loadAllergens(); // Загружаем аллергены при показе формы регистрации
+        loadAllergens(); // Загружаем список аллергенов при показе формы регистрации
       }
     }
 
-    // Очистка сообщений
     function clearMessages() {
       document.querySelectorAll('.message').forEach(msg => {
         msg.style.display = 'none';
@@ -287,7 +289,6 @@
       });
     }
 
-    // Показать сообщение
     function showMessage(elementId, text, type) {
       const element = document.getElementById(elementId);
       element.textContent = text;
@@ -295,19 +296,18 @@
       element.style.display = 'block';
     }
 
-    // Показать ошибку
     function showError(elementId, text) {
       const element = document.getElementById(elementId);
       element.textContent = text;
       element.style.display = 'block';
     }
 
-    // Загрузка аллергенов из базы данных
+    //Список аллергенов
     function loadAllergens() {
       const container = document.getElementById('spisok_allergenov');
       const loading = document.getElementById('allergensLoading');
 
-      // Проверяем, не загружены ли уже аллергены
+      // Если аллергены уже загружены, просто показываем их
       if (container.children.length > 0) {
         loading.style.display = 'none';
         container.style.display = 'grid';
@@ -331,7 +331,6 @@
           }
 
           let html = '';
-          // Берем только первые 20 ингредиентов для удобства
           ingredients.slice(0, 20).forEach(ingredient => {
             html += `
               <label class="flazok">
@@ -350,14 +349,12 @@
         });
     }
 
-    // Обработка формы входа
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
       const username = document.getElementById('login').value.trim();
       const password = document.getElementById('parol').value;
 
-      // Валидация
       let hasError = false;
 
       if (!username) {
@@ -376,7 +373,6 @@
 
       if (hasError) return;
 
-      // Отправка запроса
       const button = this.querySelector('button[type="submit"]');
       const originalText = button.textContent;
       button.textContent = 'Вход...';
@@ -414,7 +410,6 @@
       });
     });
 
-    // Обработка формы регистрации
     document.getElementById('regForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -423,11 +418,10 @@
       const password = document.getElementById('novyy_parol').value;
       const confirmPassword = document.getElementById('povtor_parolya').value;
 
-      // Получаем выбранные аллергены
+      // Получаем аллергены
       const allergenCheckboxes = document.querySelectorAll('#spisok_allergenov input[name="allergen"]:checked');
       const allergens = Array.from(allergenCheckboxes).map(cb => parseInt(cb.value));
 
-      // Валидация
       let hasError = false;
 
       if (!name) {
@@ -469,7 +463,7 @@
 
       if (hasError) return;
 
-      // Отправка запроса
+      // Запрос на регистрацию
       const button = document.getElementById('regButton');
       const originalText = button.textContent;
       button.textContent = 'Регистрация...';
@@ -510,7 +504,6 @@
       });
     });
 
-    // Очистка ошибок при вводе
     document.querySelectorAll('.pole_vvoda').forEach(input => {
       input.addEventListener('input', function() {
         const errorId = this.id + 'Error';
