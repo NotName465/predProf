@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- UI ЛОГИКА ---
+
     const menuToggle = document.getElementById('menuToggle');
     const leftPanel = document.getElementById('leftPanel');
 
@@ -32,16 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (window.innerWidth <= 768) leftPanel.classList.remove('open');
 
-            // Загрузка данных
             if (tabId === 'stats') loadStats();
             if (tabId === 'requests') loadRequests();
             if (tabId === 'reports') loadReports();
         });
     });
 
-    // --- ФУНКЦИОНАЛ ---
-
-    // 1. СТАТИСТИКА
     async function loadStats() {
         const statsList = document.getElementById('statsList');
         try {
@@ -58,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. ЗАЯВКИ
+
     async function loadRequests() {
         const list = document.getElementById('requestsList');
         const noReq = document.getElementById('noRequests');
@@ -67,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/purchase_requests');
             const requests = await res.json();
             
-            // Фильтруем только ожидающие (pending)
+
             const pending = requests.filter(r => r.status === 'pending');
 
             if (pending.length === 0) {
@@ -108,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { alert('Ошибка сети'); }
     };
 
-    // 3. ОТЧЕТЫ
+
     async function loadReports() {
         const table = document.getElementById('reportsTable');
         try {
@@ -130,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.error(e); }
     }
 
-    // Загрузка при старте
+
     loadStats();
     loadRequests();
     loadReports();

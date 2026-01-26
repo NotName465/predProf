@@ -59,7 +59,6 @@ body {
     margin: 0 20px;
 }
 
-/* Основной макет */
 .main-layout {
     display: flex;
     gap: 30px;
@@ -69,14 +68,13 @@ body {
     min-height: 60vh;
 }
 
-/* Левая панель — фиксированная ширина, прижата к левому краю */
 .left-panel {
     width: 220px;
     background: white;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    flex-shrink: 0; /* не сжимается */
+    flex-shrink: 0;
 }
 
 .head {
@@ -119,7 +117,7 @@ body {
     color: white;
 }
 
-/* Центральный контент — по центру страницы */
+
 .center-content {
     flex: 1;
     display: flex;
@@ -128,7 +126,7 @@ body {
 
 .content {
     width: 100%;
-    max-width: 600px; /* ограничиваем ширину контента */
+    max-width: 600px;
 }
 
 .tab-content {
@@ -143,7 +141,6 @@ body {
     display: block;
 }
 
-/* Форма */
 label {
     display: block;
     margin: 15px 0 5px;

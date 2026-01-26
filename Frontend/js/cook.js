@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Переключение вкладок
     const tabs = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
 
@@ -13,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const tabId = btn.getAttribute('data-tab');
             document.getElementById(tabId).classList.add('active');
 
-            // Подтягиваем данные
             if (tabId === 'stats') loadStats();
             if (tabId === 'inventory') loadInventoryData();
             if (tabId === 'procurement') loadProcurementData();
@@ -80,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Выдача конкретного заказа
     window.issueSpecificOrder = async function(orderId) {
         if (!confirm('Выдать?')) return;
         try {
@@ -91,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (res.ok) {
                 alert('Выдано!');
-                btnSearch.click(); // Перезагружаем список
+                btnSearch.click();
             } else {
                 alert('Ошибка');
             }
@@ -100,11 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- БЛОК РАБОТЫ С МЕНЮ ---
     const dateInput = document.getElementById('menuDate');
     if (dateInput) dateInput.valueAsDate = new Date();
 
-    // Загрузка списка блюд для выпадающего списка
     async function loadDishesForMenu() {
         const select = document.getElementById('menuDishSelect');
         if (!select || select.children.length > 1) return;
@@ -118,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Загрузка меню на выбранную дату
     window.loadMenuEditor = async function() {
         const date = document.getElementById('menuDate').value;
         const container = document.getElementById('menuListContainer');
@@ -142,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Формирование таблицы для отображения пунктов меню
     function renderMenuTable(items) {
         return `<table class="accounting-table" style="margin-bottom:10px;">
             <thead>
@@ -162,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </table>`;
     }
 
-    // Добавление блюда в меню
     window.addMenuItem = async function() {
         const date = document.getElementById('menuDate').value;
         const type = document.getElementById('menuMealType').value;
@@ -176,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadMenuEditor();
     };
 
-    // Удаление блюда из меню
     window.deleteMenuItem = async function(id) {
         if(confirm('Удалить?')) {
             await fetch(`/api/menu/delete/${id}`, { method:'DELETE'});
@@ -184,10 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Учёт
     window.loadInventoryData = async function() {
         try {
-            // Загрузка блюд
             const resDishes = await fetch('/api/dishes');
             const dishes = await resDishes.json();
             const dBody = document.getElementById('dishesTableBody');
@@ -200,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             onclick="toggleEdit(${d.id}, 'dish', this)">Изм.</button></td>
                 </tr>`).join('');
 
-            // Загрузка ингредиентов
             const resIng = await fetch('/api/ingredients');
             const ings = await resIng.json();
             const iBody = document.getElementById('ingredientsTableBody');
@@ -217,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Мат выражения
     function safeEvaluate(str) {
         const sanitized = str.replace(/[^0-9+\-.\s]/g, '');
         if (!sanitized) return NaN;
@@ -333,17 +320,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    //Заявки на закупку
     async function loadProcurementData() {
         try {
-            // Загрузка ингредиентов для выбора
             const resIng = await fetch('/api/ingredients');
             const ings = await resIng.json();
             document.getElementById('procurementSelect').innerHTML =
                 '<option value="">-- Продукт --</option>' +
                 ings.map(i => `<option value="${i.id}">${i.name} (сейчас: ${i.current_quantity} ${i.unit})</option>`).join('');
 
-            // Загрузка истории заявок
             const resReq = await fetch('/api/purchase_requests');
             const requests = await resReq.json();
             document.getElementById('requestsTableBody').innerHTML = requests.length ?
@@ -376,7 +360,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Статистика
     window.loadStats = async function() {
         const brIssued = document.getElementById('statIssuedBreakfast');
         const brSold = document.getElementById('statSoldBreakfast');

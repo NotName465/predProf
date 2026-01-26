@@ -12,7 +12,7 @@ frontend_dir = os.path.join(basedir, '../frontend')
 db_path = os.path.join(basedir, '../database/school_canteen.db')
 
 app = Flask(__name__, template_folder=frontend_dir, static_folder=frontend_dir)
-app.secret_key = 'super_secret_key_for_school_canteen'
+app.secret_key = 'secretKey123'
 
 
 def get_db_connection():
@@ -21,7 +21,8 @@ def get_db_connection():
     return conn
 
 
-def format_user_id(uid): return str(uid).zfill(8)
+def format_user_id(uid):
+    return str(uid).zfill(8)
 
 
 def redirect_to_role_page():
@@ -44,7 +45,6 @@ def check_subscription(user_id):
     return False
 
 
-# ROUTES
 @app.route('/')
 def index(): return render_template('index.html')
 
@@ -85,7 +85,6 @@ def serve_js(filename): return send_from_directory(os.path.join(frontend_dir, 'j
 def serve_assets(filename): return send_from_directory(os.path.join(frontend_dir, 'assets'), filename)
 
 
-# API: AUTH
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = flask_request.get_json()
@@ -124,7 +123,6 @@ def api_register():
     return jsonify({'status': 'success', 'redirect': '/student'})
 
 
-# API: USER
 @app.route('/api/user/profile', methods=['GET'])
 def get_profile():
     if 'user_id' not in session: return jsonify({'status': 'error'}), 401
@@ -169,7 +167,6 @@ def buy_sub():
     return jsonify({'status': 'success'})
 
 
-# API: ORDERS & MENU
 @app.route('/api/menu/today', methods=['GET'])
 def get_menu():
     conn = get_db_connection()
@@ -258,7 +255,6 @@ def add_review():
     return jsonify({'status': 'success'})
 
 
-# API: COOK
 @app.route('/api/dishes', methods=['GET'])
 def get_dishes():
     conn = get_db_connection()
@@ -469,8 +465,6 @@ def get_cook_stats():
     return jsonify({'breakfast': stats['breakfast'], 'lunch': stats['lunch'],
                     'breakdown': [{'name': r['name'], 'count': r['count']} for r in top]})
 
-
-# API: ADMIN
 @app.route('/api/admin/stats', methods=['GET'])
 def get_admin_stats():
     conn = get_db_connection();

@@ -1,5 +1,3 @@
-// Функция переключения между формами (Вход <-> Регистрация)
-// Должна быть глобальной, так как вызывается из onclick в HTML
 window.pokazat = function(formType) {
     const loginForm = document.getElementById('forma_vhoda');
     const registerForm = document.getElementById('forma_registracii');
@@ -12,7 +10,7 @@ window.pokazat = function(formType) {
         loginForm.classList.add('forma_skryta');
         registerForm.classList.remove('forma_skryta');
         clearMessages();
-        loadAllergens(); // Загружаем список аллергенов только когда нужна регистрация
+        loadAllergens();
     }
 };
 
@@ -27,7 +25,7 @@ function showMessage(elementId, text, type) {
     const element = document.getElementById(elementId);
     if (element) {
         element.textContent = text;
-        element.className = `message ${type}`; // type: 'success' или 'error-message'
+        element.className = `message ${type}`;
         element.style.display = 'block';
     }
 }
@@ -40,12 +38,10 @@ function showError(elementId, text) {
     }
 }
 
-// Загрузка аллергенов (ингредиентов) для чекбоксов
 async function loadAllergens() {
     const container = document.getElementById('spisok_allergenov');
     const loading = document.getElementById('allergensLoading');
 
-    // Если уже загрузили, не грузим снова
     if (container.children.length > 0) {
         if(loading) loading.style.display = 'none';
         container.style.display = 'grid';
@@ -61,7 +57,7 @@ async function loadAllergens() {
         if (!ingredients || ingredients.length === 0) {
             container.innerHTML = '<p style="grid-column:1/-1; text-align:center;">Список пуст</p>';
         } else {
-            // Генерируем чекбоксы
+
             container.innerHTML = ingredients.slice(0, 20).map(ing => `
                 <label class="flazok">
                     <input type="checkbox" name="allergen" value="${ing.id}">
@@ -78,7 +74,7 @@ async function loadAllergens() {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. ЛОГИКА ВХОДА ---
+
     const loginForm = document.getElementById('loginForm');
 
     if (loginForm) {
@@ -90,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = loginForm.querySelector('button');
             const originalText = btn.textContent;
 
-            // Сброс ошибок
+
             clearMessages();
 
             if (!username || !password) {
@@ -103,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled = true;
 
             try {
-                // Ищем параметр next в URL (куда перенаправить после входа)
                 const nextUrl = new URLSearchParams(window.location.search).get('next');
 
                 const res = await fetch('/api/login', {
@@ -119,13 +114,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
 
                 if (res.ok) {
-                    // Успех
                     showMessage('loginMessage', 'Успешно! Перенаправление...', 'success');
                     setTimeout(() => {
                         window.location.href = data.redirect;
                     }, 1000);
                 } else {
-                    // Ошибка (неверный пароль)
                     showMessage('loginMessage', data.message, 'error-message');
                     btn.textContent = originalText;
                     btn.disabled = false;
@@ -139,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
     const regForm = document.getElementById('regForm');
 
     if (regForm) {
@@ -155,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             clearMessages();
 
-            // Валидация
             let hasError = false;
             if (!name) { showError('nameError', 'Введите имя'); hasError = true; }
             if (!email) { showError('emailError', 'Введите email'); hasError = true; }
@@ -164,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (hasError) return;
 
-            // Сбор аллергенов
             const checkedBoxes = document.querySelectorAll('input[name="allergen"]:checked');
             const allergens = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
 
@@ -205,10 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Очистка ошибок при вводе
     document.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', function() {
-            const errDiv = this.nextElementSibling; // Предполагаем, что div с ошибкой идет сразу после input
+            const errDiv = this.nextElementSibling;
             if (errDiv && errDiv.classList.contains('error')) {
                 errDiv.style.display = 'none';
             }

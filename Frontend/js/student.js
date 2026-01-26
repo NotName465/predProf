@@ -1,6 +1,6 @@
 <script>
     let userData = null;
-    let userAllergens = []; // Сюда загрузятся ID аллергенов [1, 5, 8]
+    let userAllergens = [];
     let allIngredients = [];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -10,9 +10,6 @@
         loadIngredients();
     });
 
-    // ... (loadProfile, updateSubInfo, renderAllergens - без изменений) ...
-
-    // --- МЕНЮ С ПОДСВЕТКОЙ АЛЛЕРГЕНОВ ---
     async function loadMenu() {
         const container = document.getElementById('menuContainer');
         try {
@@ -25,7 +22,6 @@
                 return;
             }
 
-            // Получаем просто массив ID аллергенов для удобства поиска
             const allergenIds = userAllergens.map(a => a.id);
 
             let html = '';
@@ -35,13 +31,11 @@
                 let sectionHtml = `<h3 style="color: #0d47a1; margin: 20px 0 10px;">${title}</h3>`;
                 
                 items.forEach(dish => {
-                    // Проверка состава на аллергены
                     let isDangerous = false;
                     let ingredientsHtml = 'Нет данных о составе';
 
                     if (dish.ingredients && dish.ingredients.length > 0) {
                         ingredientsHtml = dish.ingredients.map(ing => {
-                            // Если ID ингредиента есть в списке аллергенов пользователя
                             if (allergenIds.includes(ing.id)) {
                                 isDangerous = true;
                                 return `<span style="color: #d32f2f; font-weight: bold;">${ing.name} (Аллерген!)</span>`;
@@ -50,7 +44,6 @@
                         }).join(', ');
                     }
 
-                    // Стили для опасного блюда
                     const cardStyle = isDangerous ? 'border: 2px solid #ef5350; background: #ffebee;' : '';
                     const warningIcon = isDangerous ? '!' : '';
 
@@ -80,5 +73,4 @@
         }
     }
 
-    // ... (остальные функции: orderMeal, loadOrders, pay, reviews, allergens - без изменений) ...
 </script>
