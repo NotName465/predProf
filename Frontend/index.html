@@ -4,112 +4,56 @@
   <meta charset="UTF-8">
   <title>Столовая — Школа 2098</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Candara, sans-serif;
-      height: 100vh;
-      overflow: hidden;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', sans-serif; height: 100vh; overflow: hidden; }
 
     .razmytyy_fon {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      /* Убедитесь, что картинка лежит в frontend/assets/stolovaya.jpg */
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: url('/assets/stolovaya.jpg') center/cover no-repeat;
-      filter: blur(3px);
-      z-index: -1;
+      filter: blur(3px); z-index: -1;
     }
-
 
     .shapka {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 30px;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 30px; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
     }
 
-    .zagolovok_shapki {
-      font-size: 20px;
-      color: #0d47a1;
-      font-weight: bold;
-    }
-
-    .knopki_v_shapke {
-      display: flex;
-      gap: 12px;
-    }
+    .zagolovok_shapki { font-size: 20px; color: #0d47a1; font-weight: bold; }
+    .knopki_v_shapke { display: flex; gap: 12px; }
 
     .knopka {
-      background: #2196F3;
-      color: white;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.2s;
+      background: #2196F3; color: white; border: none;
+      padding: 8px 20px; border-radius: 20px; cursor: pointer;
+      font-size: 16px; transition: background 0.2s;
     }
-
-    .knopka:hover {
-      background: #1976D2;
-    }
-
+    .knopka:hover { background: #1976D2; }
 
     .privetstvennyy_tekst {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      font-size: 36px;
-      color: white;
-      font-weight: bold;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center; font-size: 36px; color: white; font-weight: bold;
       text-shadow: 0 3px 8px rgba(0,0,0,0.9);
-      opacity: 0;
-      animation: vyiezd 1.2s ease-out forwards;
-      max-width: 90%;
-      width: 700px;
+      opacity: 0; animation: vyiezd 1.2s ease-out forwards;
+      max-width: 90%; width: 700px;
     }
 
-    @keyframes vyiezd {
-      to {
-        opacity: 1;
-      }
-    }
+    @keyframes vyiezd { to { opacity: 1; } }
   </style>
 </head>
 <body>
   <div class="razmytyy_fon"></div>
 
-
   <div class="shapka">
     <div class="zagolovok_shapki">Cтоловая — Школа 2098</div>
     <div class="knopki_v_shapke">
       <button class="knopka" onclick="window.location.href='/login'">Войти</button>
-      <button class="knopka" onclick="window.location.href='/login'">Регистрация</button>
+      <button class="knopka" onclick="window.location.href='/login?mode=register'">Регистрация</button>
+
     </div>
   </div>
-
 
   <div class="privetstvennyy_tekst">
     Автоматизированная информационная система школьного питания
   </div>
-
 </body>
 </html>

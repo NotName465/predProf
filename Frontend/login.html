@@ -9,7 +9,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Candara, sans-serif;
+      font-family: 'Times New Roman', sans-serif;
     }
 
     body {
@@ -173,14 +173,12 @@
       color: #c62828;
     }
 
-    /* Для мобилок */
     button, .knopka_formy, .ssylka_pereklyucheniya {
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       -webkit-appearance: none;
     }
 
-    /* Адаптивка */
     @media (max-width: 360px) {
       .spisok_allergenov {
         grid-template-columns: repeat(2, 1fr);
@@ -221,7 +219,7 @@
       <div id="registerMessage" class="message" style="display: none;"></div>
       <form id="regForm">
         <div class="gruppa_polei">
-          <label class="metka_poliya" for="imya">Имя</label>
+          <label class="metka_poliya" for="imya">Имя (Логин)</label>
           <input type="text" id="imya" class="pole_vvoda" autocomplete="name" required>
           <div id="nameError" class="error"></div>
         </div>
@@ -242,11 +240,9 @@
         </div>
 
         <div class="gruppa_polei">
-          <div class="metka_poliya">Аллергены и непереносимости (опционально)</div>
-          <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Отметьте продукты, на которые у вас аллергия:</p>
-          <div id="allergensLoading" class="loading">Загрузка списка аллергенов...</div>
-          <div id="spisok_allergenov" class="spisok_allergenov" style="display: none;">
-          </div>
+          <div class="metka_poliya">Аллергены (опционально)</div>
+          <div id="allergensLoading" class="loading">Загрузка списка...</div>
+          <div id="spisok_allergenov" class="spisok_allergenov" style="display: none;"></div>
         </div>
 
         <button type="submit" class="knopka_formy" id="regButton">Зарегистрироваться</button>
@@ -257,258 +253,36 @@
     </div>
   </div>
 
+  <!-- Подключаем основной скрипт -->
+  <script src="/js/login.js"></script>
+
+  <!-- Инлайн-скрипт для мгновенного переключения по URL -->
   <script>
-    // Переключение логин/регистрация
-    function pokazat(formType) {
-      const loginForm = document.getElementById('forma_vhoda');
-      const registerForm = document.getElementById('forma_registracii');
+    (function() {
+        const params = new URLSearchParams(window.location.search);
 
-      if (formType === 'vhod') {
-        loginForm.classList.remove('forma_skryta');
-        registerForm.classList.add('forma_skryta');
-        clearMessages();
-      } else if (formType === 'registraciya') {
-        loginForm.classList.add('forma_skryta');
-        registerForm.classList.remove('forma_skryta');
-        clearMessages();
-        loadAllergens(); // Загружаем список аллергенов при показе формы регистрации
-      }
-    }
+        // Если в URL есть ?mode=register
+        if (params.get('mode') === 'register') {
+            const loginBlock = document.getElementById('forma_vhoda');
+            const regBlock = document.getElementById('forma_registracii');
 
-    function clearMessages() {
-      document.querySelectorAll('.message').forEach(msg => {
-        msg.style.display = 'none';
-        msg.textContent = '';
-        msg.className = 'message';
-      });
-      document.querySelectorAll('.error').forEach(error => {
-        error.style.display = 'none';
-        error.textContent = '';
-      });
-    }
+            if (loginBlock && regBlock) {
+                // Переключаем классы
+                loginBlock.classList.add('forma_skryta');
+                regBlock.classList.remove('forma_skryta');
 
-    function showMessage(elementId, text, type) {
-      const element = document.getElementById(elementId);
-      element.textContent = text;
-      element.className = `message ${type}`;
-      element.style.display = 'block';
-    }
-
-    function showError(elementId, text) {
-      const element = document.getElementById(elementId);
-      element.textContent = text;
-      element.style.display = 'block';
-    }
-
-    //Список аллергенов
-    function loadAllergens() {
-      const container = document.getElementById('spisok_allergenov');
-      const loading = document.getElementById('allergensLoading');
-
-      // Если аллергены уже загружены, просто показываем их
-      if (container.children.length > 0) {
-        loading.style.display = 'none';
-        container.style.display = 'grid';
-        return;
-      }
-
-      fetch('/api/ingredients')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Ошибка загрузки аллергенов');
-          }
-          return response.json();
-        })
-        .then(ingredients => {
-          loading.style.display = 'none';
-
-          if (ingredients.length === 0) {
-            container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #666;">Список продуктов пуст</p>';
-            container.style.display = 'block';
-            return;
-          }
-
-          let html = '';
-          ingredients.slice(0, 20).forEach(ingredient => {
-            html += `
-              <label class="flazok">
-                <input type="checkbox" name="allergen" value="${ingredient.id}">
-                ${ingredient.name}
-              </label>
-            `;
-          });
-
-          container.innerHTML = html;
-          container.style.display = 'grid';
-        })
-        .catch(error => {
-          console.error('Ошибка загрузки аллергенов:', error);
-          loading.innerHTML = '<p style="color: #f44336;">Не удалось загрузить список аллергенов</p>';
-        });
-    }
-
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const username = document.getElementById('login').value.trim();
-      const password = document.getElementById('parol').value;
-
-      let hasError = false;
-
-      if (!username) {
-        showError('loginError', 'Введите логин или email');
-        hasError = true;
-      } else {
-        document.getElementById('loginError').style.display = 'none';
-      }
-
-      if (!password) {
-        showError('passwordError', 'Введите пароль');
-        hasError = true;
-      } else {
-        document.getElementById('passwordError').style.display = 'none';
-      }
-
-      if (hasError) return;
-
-      const button = this.querySelector('button[type="submit"]');
-      const originalText = button.textContent;
-      button.textContent = 'Вход...';
-      button.disabled = true;
-
-      fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        button.textContent = originalText;
-        button.disabled = false;
-
-        if (data.status === 'success') {
-          showMessage('loginMessage', 'Успешный вход! Перенаправление...', 'success');
-          setTimeout(() => {
-            window.location.href = data.redirect;
-          }, 1000);
-        } else {
-          showMessage('loginMessage', data.message || 'Неверный логин или пароль', 'error-message');
+                // Пробуем вызвать загрузку аллергенов
+                if (typeof loadAllergens === 'function') {
+                    loadAllergens();
+                } else {
+                    // Если внешний скрипт еще не загрузился, ждем
+                    window.addEventListener('load', () => {
+                        if (typeof loadAllergens === 'function') loadAllergens();
+                    });
+                }
+            }
         }
-      })
-      .catch(error => {
-        console.error('Ошибка входа:', error);
-        button.textContent = originalText;
-        button.disabled = false;
-        showMessage('loginMessage', 'Ошибка соединения с сервером', 'error-message');
-      });
-    });
-
-    document.getElementById('regForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const name = document.getElementById('imya').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('novyy_parol').value;
-      const confirmPassword = document.getElementById('povtor_parolya').value;
-
-      const allergenCheckboxes = document.querySelectorAll('#spisok_allergenov input[name="allergen"]:checked');
-      const allergens = Array.from(allergenCheckboxes).map(cb => parseInt(cb.value));
-
-      let hasError = false;
-
-      if (!name) {
-        showError('nameError', 'Введите имя');
-        hasError = true;
-      } else {
-        document.getElementById('nameError').style.display = 'none';
-      }
-
-      if (!email) {
-        showError('emailError', 'Введите email');
-        hasError = true;
-      } else if (!/\S+@\S+\.\S+/.test(email)) {
-        showError('emailError', 'Введите корректный email');
-        hasError = true;
-      } else {
-        document.getElementById('emailError').style.display = 'none';
-      }
-
-      if (!password) {
-        showError('passwordErrorReg', 'Введите пароль');
-        hasError = true;
-      } else if (password.length < 4) {
-        showError('passwordErrorReg', 'Пароль должен быть не менее 4 символов');
-        hasError = true;
-      } else {
-        document.getElementById('passwordErrorReg').style.display = 'none';
-      }
-
-      if (!confirmPassword) {
-        showError('confirmPasswordError', 'Повторите пароль');
-        hasError = true;
-      } else if (password !== confirmPassword) {
-        showError('confirmPasswordError', 'Пароли не совпадают');
-        hasError = true;
-      } else {
-        document.getElementById('confirmPasswordError').style.display = 'none';
-      }
-
-      if (hasError) return;
-
-      const button = document.getElementById('regButton');
-      const originalText = button.textContent;
-      button.textContent = 'Регистрация...';
-      button.disabled = true;
-
-      fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username: name,
-          email: email,
-          password: password,
-          confirm_password: confirmPassword,
-          allergens: allergens
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        button.textContent = originalText;
-        button.disabled = false;
-
-        if (data.status === 'success') {
-          showMessage('registerMessage', 'Регистрация успешна! Перенаправление...', 'success');
-          setTimeout(() => {
-            window.location.href = data.redirect;
-          }, 1500);
-        } else {
-          showMessage('registerMessage', data.message || 'Ошибка регистрации', 'error-message');
-        }
-      })
-      .catch(error => {
-        console.error('Ошибка регистрации:', error);
-        button.textContent = originalText;
-        button.disabled = false;
-        showMessage('registerMessage', 'Ошибка соединения с сервером', 'error-message');
-      });
-    });
-
-    document.querySelectorAll('.pole_vvoda').forEach(input => {
-      input.addEventListener('input', function() {
-        const errorId = this.id + 'Error';
-        const errorElement = document.getElementById(errorId);
-        if (errorElement) {
-          errorElement.style.display = 'none';
-        }
-      });
-    });
+    })();
   </script>
 </body>
 </html>

@@ -10,7 +10,7 @@ window.pokazat = function(formType) {
         loginForm.classList.add('forma_skryta');
         registerForm.classList.remove('forma_skryta');
         clearMessages();
-        loadAllergens();
+        loadAllergens(); // Загрузка список из DB
     }
 };
 
@@ -57,8 +57,7 @@ async function loadAllergens() {
         if (!ingredients || ingredients.length === 0) {
             container.innerHTML = '<p style="grid-column:1/-1; text-align:center;">Список пуст</p>';
         } else {
-
-            container.innerHTML = ingredients.slice(0, 20).map(ing => `
+            container.innerHTML = ingredients.map(ing => `
                 <label class="flazok">
                     <input type="checkbox" name="allergen" value="${ing.id}">
                     ${ing.name}
@@ -67,43 +66,36 @@ async function loadAllergens() {
         }
         container.style.display = 'grid';
     } catch (error) {
-        console.error('Ошибка загрузки аллергенов:', error);
+        console.error('Ошибка:', error);
         if(loading) loading.innerHTML = '<p style="color:red">Ошибка загрузки</p>';
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'register') {
+        window.pokazat('registraciya');
+    }
 
     const loginForm = document.getElementById('loginForm');
-
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const username = document.getElementById('login').value.trim();
-            const password = document.getElementById('parol').value;
             const btn = loginForm.querySelector('button');
             const originalText = btn.textContent;
 
-
-            clearMessages();
-
-            if (!username || !password) {
-                if (!username) showError('loginError', 'Введите логин');
-                if (!password) showError('passwordError', 'Введите пароль');
-                return;
-            }
-
-            btn.textContent = 'Вход...';
+            btn.textContent = "Вход...";
             btn.disabled = true;
 
-            try {
-                const nextUrl = new URLSearchParams(window.location.search).get('next');
+            const username = document.getElementById('login').value.trim();
+            const password = document.getElementById('parol').value;
+            const nextUrl = new URLSearchParams(window.location.search).get('next');
 
-                const res = await fetch('/api/login', {
+            try {
+                const response = await fetch('/api/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         username: username,
                         password: password,
@@ -111,21 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                 });
 
-                const data = await res.json();
+                const data = await response.json();
 
-                if (res.ok) {
-                    showMessage('loginMessage', 'Успешно! Перенаправление...', 'success');
-                    setTimeout(() => {
-                        window.location.href = data.redirect;
-                    }, 1000);
+                if (response.ok) {
+                    window.location.href = data.redirect;
                 } else {
                     showMessage('loginMessage', data.message, 'error-message');
                     btn.textContent = originalText;
                     btn.disabled = false;
                 }
             } catch (err) {
-                console.error(err);
-                showMessage('loginMessage', 'Ошибка соединения с сервером', 'error-message');
+                showMessage('loginMessage', 'Ошибка сервера', 'error-message');
                 btn.textContent = originalText;
                 btn.disabled = false;
             }
@@ -133,38 +121,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const regForm = document.getElementById('regForm');
-
     if (regForm) {
         regForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('regButton');
+            const originalText = btn.textContent;
+
+            btn.textContent = "Регистрация...";
+            btn.disabled = true;
 
             const name = document.getElementById('imya').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('novyy_parol').value;
             const confirm = document.getElementById('povtor_parolya').value;
-            const btn = document.getElementById('regButton');
-            const originalText = btn.textContent;
 
-            clearMessages();
+            if (password !== confirm) {
+                showError('confirmPasswordError', 'Пароли не совпадают');
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
 
-            let hasError = false;
-            if (!name) { showError('nameError', 'Введите имя'); hasError = true; }
-            if (!email) { showError('emailError', 'Введите email'); hasError = true; }
-            if (!password || password.length < 4) { showError('passwordErrorReg', 'Пароль мин. 4 символа'); hasError = true; }
-            if (password !== confirm) { showError('confirmPasswordError', 'Пароли не совпадают'); hasError = true; }
-
-            if (hasError) return;
-
-            const checkedBoxes = document.querySelectorAll('input[name="allergen"]:checked');
-            const allergens = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-
-            btn.textContent = 'Регистрация...';
-            btn.disabled = true;
+            const allergens = Array.from(document.querySelectorAll('input[name="allergen"]:checked')).map(cb => parseInt(cb.value));
 
             try {
-                const res = await fetch('/api/register', {
+                const response = await fetch('/api/register', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         username: name,
                         email: email,
@@ -174,33 +157,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                 });
 
-                const data = await res.json();
+                const data = await response.json();
 
-                if (res.ok) {
-                    showMessage('registerMessage', 'Аккаунт создан! Входим...', 'success');
-                    setTimeout(() => {
-                        window.location.href = data.redirect;
-                    }, 1500);
+                if (response.ok) {
+                    showMessage('registerMessage', 'Успешно! Входим...', 'success');
+                    setTimeout(() => window.location.href = data.redirect, 1000);
                 } else {
                     showMessage('registerMessage', data.message, 'error-message');
                     btn.textContent = originalText;
                     btn.disabled = false;
                 }
             } catch (err) {
-                console.error(err);
                 showMessage('registerMessage', 'Ошибка сети', 'error-message');
                 btn.textContent = originalText;
                 btn.disabled = false;
             }
         });
     }
-
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', function() {
-            const errDiv = this.nextElementSibling;
-            if (errDiv && errDiv.classList.contains('error')) {
-                errDiv.style.display = 'none';
-            }
-        });
-    });
 });

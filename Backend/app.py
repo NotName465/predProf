@@ -48,13 +48,17 @@ def check_subscription(user_id):
 @app.route('/')
 def index(): return render_template('index.html')
 
-
 @app.route('/login')
-def login(): return redirect_to_role_page() if 'user_id' in session else render_template('login.html')
-
+def login():
+    if 'user_id' in session:
+        return redirect_to_role_page()
+    return render_template('login.html')
 
 @app.route('/register')
-def register(): return redirect_to_role_page() if 'user_id' in session else render_template('login.html')
+def register():
+    if 'user_id' in session:
+        return redirect_to_role_page()
+    return render_template('login.html', mode='register')
 
 
 @app.route('/student')
@@ -74,15 +78,18 @@ def logout(): session.clear(); return redirect('/login')
 
 
 @app.route('/css/<path:filename>')
-def serve_css(filename): return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
+def serve_css(filename):
+    return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
 
 
 @app.route('/js/<path:filename>')
-def serve_js(filename): return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
+def serve_js(filename):
+    return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
 
 
 @app.route('/assets/<path:filename>')
-def serve_assets(filename): return send_from_directory(os.path.join(frontend_dir, 'assets'), filename)
+def serve_assets(filename):
+    return send_from_directory(os.path.join(frontend_dir, 'assets'), filename)
 
 
 @app.route('/api/login', methods=['POST'])
@@ -540,4 +547,4 @@ def get_pop():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
