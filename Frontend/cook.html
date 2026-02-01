@@ -583,72 +583,38 @@
         </div>
     </div>
 
-    <div id="createModal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-top:0;">Добавить в базу</h3>
-
-            <div class="type-switch">
-                <label>
-                    <input type="radio" name="createType" value="dish" checked onclick="toggleCreateFields()">
-                    <span>Блюдо</span>
-                </label>
-                <label>
-                    <input type="radio" name="createType" value="ingredient" onclick="toggleCreateFields()">
-                    <span>Продукт</span>
-                </label>
-            </div>
-
-            <label>Название:</label>
-            <input type="text" id="createName" required>
-
-            <label>Начальный остаток:</label>
-            <input type="number" id="createStock" value="0">
-
-            <div id="fieldsDish">
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1">
-                        <label>Калории:</label>
-                        <input type="number" id="createCals">
+        <div id="createModal" class="modal">
+                <div class="modal-content">
+                    <h3 style="margin-top:0;">Добавить в базу</h3>
+                    <div class="type-switch">
+                        <label><input type="radio" name="createType" value="dish" checked onclick="toggleCreateFields()"><span>Блюдо</span></label>
+                        <label><input type="radio" name="createType" value="ingredient" onclick="toggleCreateFields()"><span>Продукт</span></label>
                     </div>
-                    <div style="flex:1">
-                        <label>Цена (₽):</label>
-                        <input type="number" id="createPrice">
-                    </div>
-                </div>
-                <label>Фото:</label>
-                <input type="file" id="createImage">
-                <label>Состав (выберите ингредиенты):</label>
-                <div id="ingredientCheckboxes" style="max-height:150px; overflow-y:auto; border:1px solid #ccc; border-radius:8px; padding:10px; margin-top:5px;">
-                    Загрузка...
-                </div>
-            </div>
+                    <label>Название:</label><input type="text" id="createName" required>
+                    <label>Начальный остаток:</label><input type="number" id="createStock" value="0">
 
-            <div id="fieldsIngredient" class="hidden-field">
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1">
-                        <label>Ед. изм:</label>
-                        <select id="createUnit">
-                            <option value="кг">кг</option>
-                            <option value="л">л</option>
-                            <option value="шт">шт</option>
-                            <option value="г">г</option>
-                            <option value="мл">мл</option>
-                            <option value="упак">упак</option>
-                        </select>
+                    <div id="fieldsDish">
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:1"><label>Калории:</label><input type="number" id="createCals"></div>
+                            <div style="flex:1"><label>Цена (₽):</label><input type="number" id="createPrice"></div>
+                        </div>
+                        <label>Состав (ингредиенты):</label>
+                        <div id="ingredientCheckboxes" style="max-height:150px; overflow-y:auto; border:1px solid #ccc; border-radius:8px; padding:10px; margin-top:5px;">Загрузка...</div>
                     </div>
-                    <div style="flex:1">
-                        <label>Мин. запас:</label>
-                        <input type="number" id="createMinQty" value="5">
+
+                    <div id="fieldsIngredient" class="hidden-field">
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:1"><label>Ед. изм:</label><select id="createUnit"><option value="кг">кг</option><option value="л">л</option><option value="шт">шт</option></select></div>
+                            <div style="flex:1"><label>Мин. запас:</label><input type="number" id="createMinQty" value="5"></div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button onclick="submitCreate()" style="background:#4CAF50; flex:1;">Создать</button>
+                        <button onclick="document.getElementById('createModal').style.display='none'" style="background:#757575; flex:1;">Отмена</button>
                     </div>
                 </div>
             </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="submitCreate()" style="background: #4CAF50; flex: 1;">Создать</button>
-                <button onclick="document.getElementById('createModal').style.display='none'" style="background: #757575; flex: 1;">Отмена</button>
-            </div>
-        </div>
-    </div>
 
     <script src="/js/cook.js"></script>
 </body>

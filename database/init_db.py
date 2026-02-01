@@ -18,49 +18,22 @@ def create_tables():
     for table in tables:
         cursor.execute(f'DROP TABLE IF EXISTS {table}')
 
-    cursor.execute('''
-    CREATE TABLE users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        role TEXT NOT NULL CHECK(role IN ('student', 'cook', 'admin')),
-        balance DECIMAL(10, 2) DEFAULT 0.00,
-        subscription_end_date DATE,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-    ''')
+    cursor.execute(
+        '''CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, email TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, role TEXT NOT NULL, balance DECIMAL(10, 2) DEFAULT 0.00, subscription_end_date DATE, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 
-    cursor.execute('''
-    CREATE TABLE dishes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        name TEXT NOT NULL, 
-        description TEXT, 
-        calories INTEGER, 
-        current_stock INTEGER DEFAULT 0, 
-        price DECIMAL(10, 2) DEFAULT 0.0
-    )
-    ''')
+    cursor.execute(
+        '''CREATE TABLE dishes (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, description TEXT, calories INTEGER, current_stock INTEGER DEFAULT 0, price DECIMAL(10, 2) DEFAULT 0.0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 
-    cursor.execute('''
-    CREATE TABLE ingredients (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        name TEXT NOT NULL UNIQUE, 
-        unit TEXT NOT NULL, 
-        current_quantity REAL DEFAULT 0, 
-        min_quantity REAL DEFAULT 10.0, 
-        price_per_unit DECIMAL(10, 2)
-    )
-    ''')
-
+    cursor.execute(
+        '''CREATE TABLE ingredients (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, unit TEXT NOT NULL, current_quantity REAL DEFAULT 0, min_quantity REAL DEFAULT 10.0, price_per_unit DECIMAL(10, 2), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
     cursor.execute(
         'CREATE TABLE dish_ingredients (dish_id INTEGER NOT NULL, ingredient_id INTEGER NOT NULL, quantity REAL NOT NULL, PRIMARY KEY (dish_id, ingredient_id), FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE, FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE)')
     cursor.execute(
-        'CREATE TABLE menu (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL, meal_type TEXT NOT NULL CHECK(meal_type IN ("breakfast", "lunch")), dish_id INTEGER NOT NULL, max_portions INTEGER DEFAULT 100, FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE)')
+        'CREATE TABLE menu (id INTEGER PRIMARY KEY AUTOINCREMENT, date DATE NOT NULL, meal_type TEXT NOT NULL, dish_id INTEGER NOT NULL, max_portions INTEGER DEFAULT 100, FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE)')
     cursor.execute(
         'CREATE TABLE orders (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, menu_id INTEGER NOT NULL, order_date DATETIME DEFAULT CURRENT_TIMESTAMP, paid BOOLEAN DEFAULT 0, collected BOOLEAN DEFAULT 0, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (menu_id) REFERENCES menu(id) ON DELETE CASCADE)')
     cursor.execute(
-        'CREATE TABLE payments (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, amount DECIMAL(10, 2) NOT NULL, payment_date DATETIME DEFAULT CURRENT_TIMESTAMP, type TEXT NOT NULL CHECK(type IN ("subscription", "single", "topup")), order_id INTEGER NULL, status TEXT DEFAULT "completed", FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL)')
+        'CREATE TABLE payments (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, amount DECIMAL(10, 2) NOT NULL, payment_date DATETIME DEFAULT CURRENT_TIMESTAMP, type TEXT NOT NULL, order_id INTEGER NULL, status TEXT DEFAULT "completed", FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL)')
     cursor.execute(
         'CREATE TABLE allergens (user_id INTEGER NOT NULL, ingredient_id INTEGER NOT NULL, note TEXT, PRIMARY KEY (user_id, ingredient_id))')
     cursor.execute(
@@ -78,95 +51,34 @@ def seed_data():
     pw = generate_password_hash('1234')
     today = datetime.now().date()
 
-    users = [
-        (1, 'Admin', 'admin@school.ru', pw, 'admin', 0.0, None),
-        (2, 'Cook', 'cook@school.ru', pw, 'cook', 0.0, None),
-        (3, 'Student', 'student@school.ru', pw, 'student', 500.0, None)
-    ]
+    users = [(1, 'Admin', 'admin@school.ru', pw, 'admin', 0.0, None),
+             (2, 'Cook', 'cook@school.ru', pw, 'cook', 0.0, None),
+             (3, 'Student', 'student@school.ru', pw, 'student', 500.0, None)]
     cursor.executemany(
         'INSERT INTO users (id, username, email, password_hash, role, balance, subscription_end_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
         users)
     cursor.execute("UPDATE sqlite_sequence SET seq = 3 WHERE name = 'users'")
 
-    ingredients = [
-        ('Молоко', 'л'), ('Яйца', 'шт'), ('Мука', 'кг'), ('Сахар', 'кг'), ('Соль', 'кг'),
-        ('Картофель', 'кг'), ('Морковь', 'кг'), ('Лук', 'кг'), ('Курица', 'кг'), ('Говядина', 'кг'),
-        ('Рис', 'кг'), ('Гречка', 'кг'), ('Свекла', 'кг'), ('Капуста', 'кг'), ('Масло', 'л')
-    ]
+    ingredients = [('Молоко', 'л'), ('Яйца', 'шт'), ('Мука', 'кг'), ('Сахар', 'кг'), ('Соль', 'кг'),
+                   ('Картофель', 'кг'), ('Морковь', 'кг'), ('Лук', 'кг'), ('Курица', 'кг'), ('Говядина', 'кг'),
+                   ('Рис', 'кг'), ('Гречка', 'кг')]
     cursor.executemany('INSERT INTO ingredients (name, unit, current_quantity) VALUES (?, ?, 100)', ingredients)
 
     cursor.execute('SELECT id, name FROM ingredients')
     ing_map = {name: id for id, name in cursor.fetchall()}
 
-    dishes = [
-        ('Омлет', 250, 50, 70),
-        ('Борщ', 300, 40, 120),
-        ('Котлета', 280, 60, 90),
-        ('Гречка', 200, 80, 50),
-        ('Рис', 210, 80, 50)
-    ]
+    dishes = [('Омлет', 250, 50, 70), ('Борщ', 300, 40, 120), ('Котлета', 280, 60, 90), ('Гречка', 200, 80, 50),
+              ('Рис', 210, 80, 50)]
     cursor.executemany('INSERT INTO dishes (name, calories, current_stock, price) VALUES (?, ?, ?, ?)', dishes)
 
     cursor.execute('SELECT id, name FROM dishes')
     dish_map = {name: id for id, name in cursor.fetchall()}
 
-    if 'Омлет' in dish_map:
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Омлет'], ing_map['Яйца'], 2))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Омлет'], ing_map['Молоко'], 0.1))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Омлет'], ing_map['Масло'], 0.01))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Омлет'], ing_map['Соль'], 0.005))
+    if 'Омлет' in dish_map: cursor.execute(
+        "INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
+        (dish_map['Омлет'], ing_map['Яйца'], 2))
 
-    if 'Борщ' in dish_map:
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Борщ'], ing_map['Говядина'], 0.1))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Борщ'], ing_map['Свекла'], 0.1))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Борщ'], ing_map['Капуста'], 0.1))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Борщ'], ing_map['Картофель'], 0.1))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Борщ'], ing_map['Морковь'], 0.05))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Борщ'], ing_map['Лук'], 0.05))
-
-    if 'Котлета' in dish_map:
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Котлета'], ing_map['Курица'], 0.15))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Котлета'], ing_map['Лук'], 0.05))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Котлета'], ing_map['Яйца'], 0.5))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Котлета'], ing_map['Мука'], 0.02))
-
-    if 'Гречка' in dish_map:
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Гречка'], ing_map['Гречка'], 0.1))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Гречка'], ing_map['Масло'], 0.01))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Гречка'], ing_map['Соль'], 0.005))
-
-    if 'Рис' in dish_map:
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Рис'], ing_map['Рис'], 0.1))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Рис'], ing_map['Масло'], 0.01))
-        cursor.execute("INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                       (dish_map['Рис'], ing_map['Соль'], 0.005))
-
-    menu = [
-        (today.isoformat(), 'breakfast', dish_map['Омлет']),
-        (today.isoformat(), 'lunch', dish_map['Борщ']),
-        (today.isoformat(), 'lunch', dish_map['Котлета']),
-        (today.isoformat(), 'lunch', dish_map['Гречка']),
-        (today.isoformat(), 'lunch', dish_map['Рис'])
-    ]
+    menu = [(today.isoformat(), 'breakfast', dish_map['Омлет']), (today.isoformat(), 'lunch', dish_map['Борщ'])]
     cursor.executemany('INSERT INTO menu (date, meal_type, dish_id) VALUES (?, ?, ?)', menu)
 
     conn.commit()

@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             const bg = order.image_url ? `url('${order.image_url}')` : '';
                             html += `
                             <div class="dish-card" style="display:flex; align-items:center; margin-bottom:10px;">
-                                <div class="dish-img" style="background-image:${bg}; background-color:#eee;"></div>
                                 <div style="flex:1; margin-left:15px;">
                                     <h3 style="margin:0 0 5px; color:#1565C0;">${order.dish_name}</h3>
                                     <p style="margin:0;">${order.meal_type==='breakfast'?'Завтрак':'Обед'} | ${order.calories} ккал</p>
@@ -276,34 +275,36 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fieldsIngredient').style.display = type === 'dish' ? 'none' : 'block';
     };
 
-    window.submitCreate = async function() {
+        window.submitCreate = async function() {
         const type = document.querySelector('input[name="createType"]:checked').value;
         const name = document.getElementById('createName').value;
         const stock = document.getElementById('createStock').value;
+
         if (!name) return alert('Название обязательно');
 
-        const formData = new FormData();
-        formData.append('type', type);
-        formData.append('name', name);
-        formData.append('stock', stock);
+        const payload = {
+            type: type,
+            name: name,
+            stock: stock
+        };
 
         if (type === 'dish') {
-            formData.append('calories', document.getElementById('createCals').value || 0);
-            formData.append('price', document.getElementById('createPrice').value || 0);
-            const file = document.getElementById('createImage').files[0];
-            if (file) formData.append('image', file);
+            payload.calories = document.getElementById('createCals').value || 0;
+            payload.price = document.getElementById('createPrice').value || 0;
+
             const boxes = document.querySelectorAll('#ingredientCheckboxes input:checked');
             const ingIds = Array.from(boxes).map(c => parseInt(c.value));
-            formData.append('ingredients', JSON.stringify(ingIds));
+            payload.ingredients = JSON.stringify(ingIds);
         } else {
-            formData.append('unit', document.getElementById('createUnit').value);
-            formData.append('min_quantity', document.getElementById('createMinQty').value || 0);
+            payload.unit = document.getElementById('createUnit').value;
+            payload.min_quantity = document.getElementById('createMinQty').value || 0;
         }
 
         try {
             const res = await fetch('/api/inventory/create_item', {
                 method: 'POST',
-                body: formData
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
             });
             const data = await res.json();
             if (res.ok) {
@@ -312,12 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('createName').value = '';
                 loadInventoryData();
                 if(type === 'dish') loadDishesForMenu();
-            } else {
-                alert(data.message);
-            }
-        } catch (e) {
-            alert('Ошибка при создании');
-        }
+            } else alert(data.message);
+        } catch (e) { alert('Ошибка'); }
     };
 
     async function loadProcurementData() {

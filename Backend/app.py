@@ -1,3 +1,8 @@
+
+
+
+
+
 import sqlite3
 import os
 import json
@@ -8,8 +13,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 basedir = os.path.dirname(os.path.abspath(__file__))
-frontend_dir = os.path.join(basedir, '../frontend')
+frontend_dir = os.path.join(basedir, '../Frontend')
 db_path = os.path.join(basedir, '../database/school_canteen.db')
+
 
 app = Flask(__name__, template_folder=frontend_dir, static_folder=frontend_dir)
 app.secret_key = 'secretKey123'
@@ -286,51 +292,6 @@ def get_ingr():
     conn.close();
     return jsonify([dict(i) for i in ings])
 
-
-@app.route('/api/inventory/create_item', methods=['POST'])
-def create_item():
-    if session.get('role') != 'cook': return jsonify({'status': 'error'}), 403
-    name = flask_request.form.get('name', '').strip()
-    stock = flask_request.form.get('stock', 0)
-    item_type = flask_request.form.get('type')
-
-    if not name: return jsonify({'status': 'error', 'message': 'Имя обязательно'}), 400
-    conn = get_db_connection()
-    try:
-        if item_type == 'dish':
-            if conn.execute('SELECT id FROM dishes WHERE name=?', (name,)).fetchone(): return jsonify(
-                {'status': 'error', 'message': 'Дубликат'}), 400
-            file = flask_request.files.get('image');
-            img_url = ''
-            if file and file.filename:
-                fn = secure_filename(file.filename);
-                file.save(os.path.join(frontend_dir, 'assets', fn));
-                img_url = f'/assets/{fn}'
-
-            cur = conn.execute(
-                'INSERT INTO dishes (name, current_stock, calories, price, image_url) VALUES (?, ?, ?, ?, ?)',
-                (name, stock, flask_request.form.get('calories'), flask_request.form.get('price'), img_url))
-
-            ings_json = flask_request.form.get('ingredients', '[]')
-            try:
-                for iid in json.loads(ings_json): conn.execute(
-                    'INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, 1)',
-                    (cur.lastrowid, iid))
-            except:
-                pass
-        else:
-            if conn.execute('SELECT id FROM ingredients WHERE name=?', (name,)).fetchone(): return jsonify(
-                {'status': 'error', 'message': 'Дубликат'}), 400
-            conn.execute(
-                'INSERT INTO ingredients (name, current_quantity, unit, min_quantity, price_per_unit) VALUES (?, ?, ?, ?, 0)',
-                (name, stock, flask_request.form.get('unit'), flask_request.form.get('min_quantity')))
-        conn.commit()
-    except Exception as e:
-        conn.close(); return jsonify({'status': 'error', 'message': str(e)}), 500
-    conn.close();
-    return jsonify({'status': 'success'})
-
-
 @app.route('/api/inventory/update', methods=['POST'])
 def update_inv():
     if session.get('role') not in ['cook', 'admin']: return jsonify({'status': 'error'}), 403
@@ -430,6 +391,31 @@ def add_menu_item():
     return jsonify({'status': 'success'})
 
 
+@app.route('/api/add_dish', methods=['POST'])
+def add_dish():
+    if session.get('role') not in ['cook', 'admin']: return jsonify({'status': 'error'}), 403
+
+    data = flask_request.get_json() if flask_request.is_json else flask_request.form
+
+    name = data.get('name')
+    stock = data.get('stock')
+    cals = data.get('calories')
+    price = data.get('price', 0)
+
+    if not name: return jsonify({'status': 'error', 'message': 'Имя обязательно'}), 400
+
+    conn = get_db_connection()
+    try:
+        conn.execute('INSERT INTO dishes (name, current_stock, calories, price) VALUES (?, ?, ?, ?)',
+                     (name, stock, cals, price))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+    conn.close()
+    return jsonify({'status': 'success'})
+
 @app.route('/api/menu/delete/<int:id>', methods=['DELETE'])
 def del_menu_item(id):
     conn = get_db_connection();
@@ -452,6 +438,60 @@ def purchase_reqs():
         'INSERT INTO purchase_requests (ingredient_id, quantity, requested_by, status) VALUES (?, ?, ?, "pending")',
         (d['ingredient_id'], d['quantity'], session['user_id']));
     conn.commit();
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+@app.route('/api/inventory/create_item', methods=['POST'])
+def create_item():
+    if session.get('role') != 'cook': return jsonify({'status': 'error'}), 403
+
+    data = flask_request.get_json() if flask_request.is_json else flask_request.form
+    name = data.get('name')
+    item_type = data.get('type')
+    stock = data.get('stock', 0)
+
+    if not name: return jsonify({'status': 'error', 'message': 'Имя обязательно'}), 400
+
+    conn = get_db_connection()
+    try:
+        if item_type == 'dish':
+            if conn.execute('SELECT id FROM dishes WHERE name=?', (name,)).fetchone():
+                return jsonify({'status': 'error', 'message': 'Дубликат'}), 400
+
+            cals = data.get('calories', 0)
+            price = data.get('price', 0)
+
+
+            cur = conn.execute('INSERT INTO dishes (name, current_stock, calories, price) VALUES (?, ?, ?, ?)',
+                               (name, stock, cals, price))
+            dish_id = cur.lastrowid
+
+            ing_ids_json = data.get('ingredients', '[]')
+            try:
+                ing_ids = json.loads(ing_ids_json)
+                for i_id in ing_ids:
+                    conn.execute('INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity) VALUES (?, ?, 1)',
+                                 (dish_id, i_id))
+            except:
+                pass
+
+        elif item_type == 'ingredient':
+
+            if conn.execute('SELECT id FROM ingredients WHERE name=?', (name,)).fetchone():
+                return jsonify({'status': 'error', 'message': 'Дубликат'}), 400
+            conn.execute(
+                'INSERT INTO ingredients (name, current_quantity, unit, min_quantity, price_per_unit) VALUES (?, ?, ?, ?, 0)',
+                (name, stock, data.get('unit', 'kg'), data.get('min_quantity', 10)))
+
+        else:
+            return jsonify({'status': 'error', 'message': 'Неверный тип'}), 400
+
+        conn.commit()
+    except Exception as e:
+        conn.close();
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
     conn.close()
     return jsonify({'status': 'success'})
 
