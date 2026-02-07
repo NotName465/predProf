@@ -1,5 +1,55 @@
 document.addEventListener('DOMContentLoaded', () => {
+    function showCookNotification(title, text, type) {
+        const div = document.createElement('div');
+        const bgColor = type === 'approved' ? '#4CAF50' : '#F44336';
 
+        div.style.cssText = `
+            position: fixed; top: 80px; right: 20px;
+            background: ${bgColor}; color: white;
+            padding: 15px 20px; border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        `;
+        div.innerHTML = `<b>${title}</b><br>${text}`;
+
+        document.body.appendChild(div);
+        setTimeout(() => {
+            div.style.opacity = '0';
+            div.style.transition = 'opacity 0.5s';
+            setTimeout(() => div.remove(), 500);
+        }, 5000);
+    }
+
+    let processedNotifications = new Set();
+
+    setInterval(async () => {
+        try {
+            const res = await fetch('/api/notifications/cook');
+            const data = await res.json();
+
+            if (data.length > 0) {
+
+                const n = data[0];
+
+                const key = `${n.name}-${n.status}`;
+                if (processedNotifications.has(key)) return;
+
+                processedNotifications.add(key);
+                setTimeout(() => processedNotifications.delete(key), 20000);
+
+                if (n.status === 'approved') {
+                    showCookNotification('Заявка одобрена!', `${n.name}: ${n.quantity} ${n.unit}`, 'approved');
+                    loadInventoryData();
+                } else {
+                    showCookNotification('Заявка отклонена', `${n.name}: ${n.quantity} ${n.unit}`, 'rejected');
+                }
+
+                if (document.getElementById('procurement').classList.contains('active')) {
+                    loadProcurementData();
+                }
+            }
+        } catch(e) {}
+    }, 5000);
     const tabs = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
 
@@ -321,24 +371,40 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resIng = await fetch('/api/ingredients');
             const ings = await resIng.json();
-            document.getElementById('procurementSelect').innerHTML =
-                '<option value="">-- Продукт --</option>' +
+            const select = document.getElementById('procurementSelect');
+            select.innerHTML = '<option value="">-- Выберите продукт --</option>' +
                 ings.map(i => `<option value="${i.id}">${i.name} (сейчас: ${i.current_quantity} ${i.unit})</option>`).join('');
 
             const resReq = await fetch('/api/purchase_requests');
             const requests = await resReq.json();
-            document.getElementById('requestsTableBody').innerHTML = requests.length ?
-                requests.map(r => `
+            const tbody = document.getElementById('requestsTableBody');
+
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">История пуста</td></tr>';
+            } else {
+                tbody.innerHTML = requests.map(r => {
+                    let statusClass = 'status-pending';
+                    let statusText = 'Ожидает';
+
+                    if (r.status === 'approved') {
+                        statusClass = 'status-approved';
+                        statusText = 'Одобрено';
+                    }
+                    if (r.status === 'rejected') {
+                        statusClass = 'status-rejected';
+                        statusText = 'Отклонено';
+                    }
+
+                    return `
                     <tr>
                         <td>${new Date(r.request_date).toLocaleDateString()}</td>
                         <td>${r.ingredient_name}</td>
                         <td>${r.quantity} ${r.unit}</td>
-                        <td class="status-${r.status}">${r.status === 'pending' ? 'Ожидает' : r.status}</td>
-                    </tr>
-                `).join('') : '<tr><td colspan="4">Пусто</td></tr>';
-        } catch (e) {
-            console.error('Ошибка загрузки заявок:', e);
-        }
+                        <td class="${statusClass}">${statusText}</td>
+                    </tr>`;
+                }).join('');
+            }
+        } catch (e) { console.error(e); }
     }
 
     if(document.getElementById('btnRequest')) {
@@ -386,7 +452,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             brIssued.style.opacity = 1;
         }
+
     };
+
 
     loadInventoryData();
 });

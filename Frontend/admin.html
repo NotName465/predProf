@@ -375,6 +375,16 @@
                 grid-template-columns: 1fr;
             }
         }
+        .toast {
+        position: fixed; top: 20px; right: 20px;
+        background: #333; color: white;
+        padding: 15px 25px; border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        z-index: 9999; animation: slideIn 0.3s ease-out;
+        cursor: pointer;
+    }
+    .toast:hover { background: #444; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -719,6 +729,65 @@
         function logout() {
             fetch('/logout').then(() => window.location.href = '/login');
         }
+        let lastPendingCount = -1;
+
+    function showNotification(count) {
+        const old = document.getElementById('adminNotif');
+        if (old) old.remove();
+
+        const div = document.createElement('div');
+        div.id = 'adminNotif';
+        div.className = 'toast';
+        div.innerHTML = `<b>Новые заявки: ${count}</b><br><span style="font-size:12px">Нажмите, чтобы посмотреть</span>`;
+
+        div.onclick = () => {
+            document.querySelector('[data-tab="requests"]').click();
+            div.remove();
+        };
+
+        document.body.appendChild(div);
+
+        setTimeout(() => { if(div.parentNode) div.remove(); }, 10000);
+    }
+
+     let lastShownCount = 0;
+
+        setInterval(async () => {
+            try {
+                const r = await fetch('/api/notifications/admin');
+                const d = await r.json();
+                const count = d.pending_count;
+
+                if(count > 0 && count > lastShownCount) {
+
+                    let n = document.getElementById('notif');
+
+                    if (!n) {
+                        n = document.createElement('div');
+                        n.id = 'notif';
+                        n.style.cssText = "position:fixed; top:80px; right:20px; background:#2196F3; color:white; padding:15px 25px; border-radius:8px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.3); z-index:9999; animation: slideIn 0.3s ease-out;";
+
+                        n.onclick = () => {
+                            document.querySelector('[data-tab="requests"]').click();
+                            n.remove();
+
+                        };
+                        document.body.appendChild(n);
+                    }
+
+                    n.innerHTML = `<b>Новые заявки: ${count}</b><br><span style='font-size:12px'>Нажмите для просмотра</span>`;
+
+                    lastShownCount = count;
+                }
+                else if (count < lastShownCount) {
+                    lastShownCount = count;
+                    if (count === 0) {
+                        const n = document.getElementById('notif');
+                        if (n) n.remove();
+                    }
+                }
+            } catch(e){}
+        }, 5000);
     </script>
 </body>
 </html>

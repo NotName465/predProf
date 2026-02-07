@@ -586,5 +586,36 @@ def get_pop():
                      'percentage': int((r['count'] / (sum([x['count'] for x in top]) or 1)) * 100)} for r in top])
 
 
+@app.route('/api/notifications/admin', methods=['GET'])
+def admin_notif():
+    if session.get('role') != 'admin': return jsonify({'pending_count': 0})
+
+    conn = get_db_connection()
+    try:
+        count = conn.execute("SELECT COUNT(*) as c FROM purchase_requests WHERE status='pending'").fetchone()['c']
+    except:
+        count = 0
+    conn.close()
+
+    return jsonify({'pending_count': count}), 200
+
+@app.route('/api/notifications/cook', methods=['GET'])
+def cook_notif():
+    if session.get('role') != 'cook': return jsonify([])
+
+    conn = get_db_connection()
+    notifs = conn.execute('''
+        SELECT i.name, pr.quantity, i.unit, pr.status
+        FROM purchase_requests pr 
+        JOIN ingredients i ON pr.ingredient_id = i.id 
+        WHERE pr.requested_by = ? 
+          AND pr.status IN ('approved', 'rejected') 
+          AND pr.approved_date >= datetime('now', '-20 seconds', 'localtime')
+    ''', (session['user_id'],)).fetchall()
+
+    conn.close()
+    return jsonify([dict(n) for n in notifs]), 200
+
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")
+

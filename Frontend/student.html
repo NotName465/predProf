@@ -50,6 +50,17 @@
     .card-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
     .card-row { display: flex; gap: 10px; }
     .card-row input { flex: 1; }
+
+    .toast {
+        position: fixed; top: 20px; right: 20px;
+        padding: 15px 25px; border-radius: 50px;
+        color: white; font-weight: bold;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        z-index: 9999; animation: slideIn 0.3s ease-out;
+    }
+    .toast-success { background: #4CAF50; }
+    .toast-info { background: #2196F3; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -243,7 +254,7 @@
         return (nCheck % 10) == 0;
     }
 
-    // Хеширование: SHA-256
+    // Хеширование
     async function sha256(message) {
         const msgBuffer = new TextEncoder().encode(message);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -417,7 +428,7 @@
         const text = document.getElementById('reviewComment').value;
         if(!rating) { alert('Поставьте оценку!'); return; }
         await fetch('/api/reviews', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({dish_id: id, rating, comment: text}) });
-        alert('Спасибо!');
+        alert('Отзыв отправлен!');
         document.getElementById('reviewModal').style.display = 'none';
     }
 
@@ -450,6 +461,68 @@
         if(res.ok) { alert('Готово!'); loadProfile(); }
         else alert(data.message || 'Ошибка');
     }
+     function showToast(message, type = 'success') {
+        const div = document.createElement('div');
+        div.className = `toast toast-${type}`;
+        div.innerHTML = message;
+        document.body.appendChild(div);
+        setTimeout(() => {
+            div.style.opacity = '0';
+            div.style.transform = 'translateX(100%)';
+            div.style.transition = 'all 0.3s';
+            setTimeout(() => div.remove(), 300);
+        }, 4000);
+    }
+
+    async function orderMeal(menuId) {
+        if(!confirm('Оформить заказ?')) return;
+
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({menu_id: menuId})
+            });
+            const data = await res.json();
+
+            if(res.ok) {
+                showToast('Блюдо добавлено к заказу!');
+                loadOrders();
+                loadProfile();
+            } else {
+                alert(data.message);
+            }
+        } catch(e) { alert('Ошибка сети'); }
+    }
+
+    let collectedOrdersCache = new Set();
+
+    let ordersStatusMap = {};
+    let isFirstLoad = true;
+
+    setInterval(async () => {
+        try {
+            const res = await fetch('/api/orders/my');
+            const orders = await res.json();
+
+            orders.forEach(order => {
+                const isToday = new Date(order.date).setHours(0,0,0,0) === new Date().setHours(0,0,0,0);
+
+                if (isToday) {
+                    if (ordersStatusMap[order.id] === undefined) {
+                        ordersStatusMap[order.id] = order.collected;
+                    }
+                    else if (ordersStatusMap[order.id] === 0 && order.collected === 1) {
+                        showToast(`<b>${order.dish_name}</b> получено! Приятного аппетита!`, 'info');
+                        loadOrders();
+                        ordersStatusMap[order.id] = 1;
+                    }
+                }
+            });
+
+            isFirstLoad = false;
+        } catch(e) {}
+    }, 5000);
 
     function logout() { fetch('/logout').then(() => window.location.href='/login'); }
   </script>
